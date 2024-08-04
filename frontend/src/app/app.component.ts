@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, RouterOutlet} from '@angular/router';
 import {SensorApiService} from "./sensor_api.service";
+import {TextService} from "./text.service";
 import {
   auditTime,
   BehaviorSubject,
@@ -32,7 +33,7 @@ export class AppComponent implements OnInit {
     () => this.sensorApi.getSensorRead()
   ), shareReplay())
 
-  constructor(private readonly sensorApi: SensorApiService, private readonly route: ActivatedRoute) {
+  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute) {
   }
 
   ngOnInit() {
@@ -44,6 +45,10 @@ export class AppComponent implements OnInit {
       console.log(p);
       // this.imagesApi.getImagesList(p['dir']).subscribe(v => void this.curImages.next(v))
     })
+  }
+
+  asHtml() {
+    return this.text.asHtml$;
   }
 
   updateViewer(imageData: ImageData) {
