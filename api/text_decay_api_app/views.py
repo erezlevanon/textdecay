@@ -19,8 +19,14 @@ if exhibit:
     d_sensor = DistanceSensor(trigger=16, echo=18)
 
 
+read_counter_ = 0
+
+
 class ReadSensorViewSet(viewsets.ModelViewSet):
     def list(self, request):
+        global read_counter_
+
         if exhibit:
             return Response(d_sensor.distance)
-        return Response(random.randint(0, 1000))
+        read_counter_ = read_counter_ + 1
+        return Response(read_counter_ - 1)

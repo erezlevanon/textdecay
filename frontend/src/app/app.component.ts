@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, OnInit} from '@angular/core';
 import {ActivatedRoute, RouterOutlet} from '@angular/router';
 import {SensorApiService} from "./sensor_api.service";
 import {TextService} from "./text.service";
@@ -31,9 +31,9 @@ export class AppComponent implements OnInit {
 
   private readonly latestRead = this.interval.pipe(switchMap(
     () => this.sensorApi.getSensorRead()
-  ), shareReplay())
+  ), shareReplay(), tap((read) => this.updateClasses(read)))
 
-  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute) {
+  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute, private elem: ElementRef) {
   }
 
   ngOnInit() {
@@ -61,5 +61,27 @@ export class AppComponent implements OnInit {
 
   getSensorRead(): Observable<number> {
     return this.latestRead;
+  }
+
+  private updateClasses(read: number) {
+    for (const term of this.text.terms.value) {
+      const normalizedScore = this.mapValue(this.text.getTFIDF(term), this.text.minScore.value, this.text.maxScore.value, 0, 1000);
+      try {
+        for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
+          // console.log(read, normalizedScore);
+          if (normalizedScore < read) {
+            e.classList.add('hidden');
+          } else {
+            e.classList.remove('hidden');
+          }
+        }
+      } catch {
+
+      }
+    }
+  }
+
+  private mapValue(x: number, oldMin: number, oldMax: number, newMin: number, newMax: number) {
+    return (x - oldMin / (oldMax - oldMin)) * (newMax - newMin) + newMin;
   }
 }
