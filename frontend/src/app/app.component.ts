@@ -32,11 +32,10 @@ export class AppComponent implements OnInit {
     switchMap(() => this.sensorApi.getSensorRead()),
     shareReplay(),
     tap(v => {
-      if (v) {
-        this.decayFactor++;
-      } else {
-        this.decayFactor--
-      }
+      const noise = Math.random() > 0.6 ? -1 : 1;
+      const dir = v ? 1 : -1;
+      const change = dir * noise;
+      this.decayFactor += change;
     }),
     tap(() => this.updateClasses()));
 

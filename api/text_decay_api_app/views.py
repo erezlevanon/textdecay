@@ -22,4 +22,4 @@ class ReadSensorViewSet(viewsets.ModelViewSet):
     def list(self, request):
         if exhibit:
             return Response(d_sensor.distance < 0.5)
-        return Response(True if random.random() < 0.8 else False)
+        return Response(True)
