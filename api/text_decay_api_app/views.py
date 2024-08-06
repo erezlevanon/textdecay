@@ -18,22 +18,8 @@ exhibit = config("EXHIBIT", cast=bool)
 if exhibit:
     d_sensor = DistanceSensor(trigger=16, echo=18)
 
-
-read_counter_ = 0
-
-
 class ReadSensorViewSet(viewsets.ModelViewSet):
     def list(self, request):
-        global read_counter_
-
         if exhibit:
-            return Response(d_sensor.distance)
-        read_counter_ = read_counter_ + 1
-        return Response(read_counter_ - 1)
-
-
-class ResetMockSensorViewSet(viewsets.ModelViewSet):
-    def list(self, request):
-        global read_counter_
-        read_counter_ = 0
-        return Response()
+            return Response(d_sensor.distance < 0.5)
+        return Response(True if random.random() < 0.8 else False)

@@ -24,7 +24,6 @@ from text_decay_api_app import views
 
 router = routers.DefaultRouter()
 router.register(r'read_sensor', views.ReadSensorViewSet, basename="read_sensor")
-router.register(r'reset_mock', views.ResetMockSensorViewSet, basename="reset_mock")
 
 urlpatterns = [
                   path('api/v1/', include(router.urls)),

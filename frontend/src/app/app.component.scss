@@ -6,31 +6,11 @@
   min-height: 100vh;
   height: 100vh;
   overflow: hidden;
-}
-
-.images-container {
-  display: flex;
-  //flex-grow: 1;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  width: 100%;
 }
 
-.image-instance {
+.text-container {
+  max-width: 600px;
   display: flex;
-  margin: 5px;
-  position: relative;
-}
-
-.images-explorer {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  max-height: 100%;
-  overflow-y: scroll;
-}
-
-.detail-view {
-  min-width: 500px;
-  max-width: 50%;
 }

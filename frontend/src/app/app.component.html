@@ -1,4 +1,6 @@
 <div>
-  yo - {{ getSensorRead() | async }}
-  <div class="text-container" [innerHTML]="asHtml() | async"></div>
+ {{ (latestRead | async) ? "you are standing here." : "you are not standing here." }}
+  <div class="text-container">
+    <div class="actual-text" [innerHTML]="asHtml() | async"></div>
+  </div>
 </div>

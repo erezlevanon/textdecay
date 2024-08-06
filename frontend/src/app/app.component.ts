@@ -27,18 +27,27 @@ import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 export class AppComponent implements OnInit {
   title = 'decaying_storage_frontend';
 
-  private readonly interval = interval(1000);
+  private readonly interval = interval(100);
+  readonly latestRead = this.interval.pipe(
+    switchMap(() => this.sensorApi.getSensorRead()),
+    shareReplay(),
+    tap(v => {
+      if (v) {
+        this.decayFactor++;
+      } else {
+        this.decayFactor--
+      }
+    }),
+    tap(() => this.updateClasses()));
 
-  private readonly latestRead = this.interval.pipe(switchMap(
-    () => this.sensorApi.getSensorRead()
-  ), shareReplay(), tap((read) => this.updateClasses(read)))
+  private decayFactor = 0;
 
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute, private elem: ElementRef) {
+    this.latestRead.subscribe();
   }
 
   ngOnInit() {
     this.updateImages();
-    this.sensorApi.resetMock().subscribe();
   }
 
   updateImages() {
@@ -60,17 +69,13 @@ export class AppComponent implements OnInit {
     return `${Math.floor(Math.random() * interval * 2) - interval}${unit}`;
   }
 
-  getSensorRead(): Observable<number> {
-    return this.latestRead;
-  }
-
-  private updateClasses(read: number) {
+  private updateClasses() {
     for (const term of this.text.terms.value) {
       const normalizedScore = this.mapValue(this.text.getTFIDF(term), this.text.minScore.value, this.text.maxScore.value, 0, 1000);
       try {
         for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
           // console.log(read, normalizedScore);
-          if (normalizedScore > read) {
+          if (normalizedScore > this.decayFactor) {
             e.classList.add('hidden');
           } else {
             e.classList.remove('hidden');
@@ -84,5 +89,9 @@ export class AppComponent implements OnInit {
 
   private mapValue(x: number, oldMin: number, oldMax: number, newMin: number, newMax: number) {
     return (x - oldMin / (oldMax - oldMin)) * (newMax - newMin) + newMin;
+  }
+
+  getDecayFactor() {
+    return this.decayFactor;
   }
 }
