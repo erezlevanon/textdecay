@@ -1,0 +1,12 @@
+examples
+output_images
+.venv
+.venv2
+.idea
+input_images
+*.pt
+/api/.env
+/api/db.sqlite3
+/api/media/*
+/api/decaying_storage_api/db.sqlite3
+/api/static/text_decay_api_app/browser/
