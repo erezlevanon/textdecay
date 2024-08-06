@@ -15,4 +15,11 @@ export class SensorApiService {
       return response as number;
     }));
   }
+
+  resetMock(): Observable<any> {
+    let url = "http://localhost:8000/api/v1/reset_mock/";
+     return (this.http.get(url)).pipe(map(response => {
+      return response;
+    }));
+  }
 }

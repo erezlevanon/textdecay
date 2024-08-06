@@ -38,6 +38,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.updateImages();
+    this.sensorApi.resetMock().subscribe();
   }
 
   updateImages() {
@@ -69,7 +70,7 @@ export class AppComponent implements OnInit {
       try {
         for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
           // console.log(read, normalizedScore);
-          if (normalizedScore < read) {
+          if (normalizedScore > read) {
             e.classList.add('hidden');
           } else {
             e.classList.remove('hidden');

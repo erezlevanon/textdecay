@@ -30,3 +30,10 @@ class ReadSensorViewSet(viewsets.ModelViewSet):
             return Response(d_sensor.distance)
         read_counter_ = read_counter_ + 1
         return Response(read_counter_ - 1)
+
+
+class ResetMockSensorViewSet(viewsets.ModelViewSet):
+    def list(self, request):
+        global read_counter_
+        read_counter_ = 0
+        return Response()
