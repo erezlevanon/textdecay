@@ -35,7 +35,7 @@ export class AppComponent implements OnInit {
       const noise = Math.random() > 0.6 ? -1 : 1;
       const dir = v ? 1 : -1;
       const change = dir * noise;
-      this.decayFactor += change;
+      this.decayFactor = Math.max(this.decayFactor + change, 0);
     }),
     tap(() => this.updateClasses()));
 
