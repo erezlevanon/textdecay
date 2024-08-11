@@ -20,7 +20,7 @@ from gpiozero import DistanceSensor
 
 exhibit = config("EXHIBIT", cast=bool)
 if exhibit:
-    d_sensor = DistanceSensor(trigger=16, echo=18)
+    d_sensor = DistanceSensor(trigger=23, echo=24)
 
 
 class ReadSensorViewSet(viewsets.ModelViewSet):
