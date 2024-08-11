@@ -25,8 +25,12 @@ if exhibit:
 
 class ReadSensorViewSet(viewsets.ModelViewSet):
     def list(self, request):
+        print('in read_sensor')
         if exhibit:
-            return Response(d_sensor.distance < 0.5)
+            print('exhibit')
+            d = d_sensor.distance
+            print('got distance {}'.format(d))
+            return Response(d < 0.5)
         return Response(True)
 
 
