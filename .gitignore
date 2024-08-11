@@ -9,6 +9,4 @@ input_images
 /api/db.sqlite3
 /api/media/*
 /api/decaying_storage_api/db.sqlite3
-/api/text_decay_api_project/static/text_decay_api_app/browser/
-/api/text_decay_api_project/static/text_decay_api_app/3rdpartylicenses.txt
 /api/text_decay_api_project/db.sqlite3
