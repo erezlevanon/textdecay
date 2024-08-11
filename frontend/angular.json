@@ -17,7 +17,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../api/static/text_decay_api_app",
+            "outputPath": "../api/text_decay_api_project/static/text_decay_api_app",
+            "deployUrl": "static/text_decay_api_app/browser/",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [

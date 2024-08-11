@@ -20,12 +20,14 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework import routers
 
-from text_decay_api_app import views
+from text_decay_api_app import views as app_views
 
 router = routers.DefaultRouter()
-router.register(r'read_sensor', views.ReadSensorViewSet, basename="read_sensor")
+router.register(r'read_sensor', app_views.ReadSensorViewSet, basename="read_sensor")
 
 urlpatterns = [
+                  path('', app_views.AngularAppView.as_view(), name='index'),
                   path('api/v1/', include(router.urls)),
                   path('admin/', admin.site.urls),
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  path('<path:path>', app_views.AngularAppView.as_view(), name='angular_app_with_path'),
+              ]

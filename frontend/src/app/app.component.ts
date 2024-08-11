@@ -27,7 +27,7 @@ import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 export class AppComponent implements OnInit {
   title = 'decaying_storage_frontend';
 
-  private readonly interval = interval(100);
+  private readonly interval = interval(1000);
   readonly latestRead = this.interval.pipe(
     switchMap(() => this.sensorApi.getSensorRead()),
     shareReplay(),

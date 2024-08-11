@@ -10,7 +10,7 @@ export class SensorApiService {
   }
 
   getSensorRead(): Observable<boolean> {
-    let url = "http://localhost:8000/api/v1/read_sensor/";
+    let url = "api/v1/read_sensor/";
     return (this.http.get(url)).pipe(map(response => {
       return response as boolean;
     }));

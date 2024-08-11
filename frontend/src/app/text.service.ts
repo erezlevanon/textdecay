@@ -1,3 +1,4 @@
+import {APP_BASE_HREF} from '@angular/common'
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, map, Observable, ReplaySubject, switchMap, tap} from "rxjs";
@@ -14,6 +15,8 @@ export class TextService {
   private termToFreq = new Map<string, number>();
   private termToDocFreq = new Map<string, number>();
   private tfidf = new Map<string, number>();
+
+  private readonly deployUrl = 'static/text_decay_api_app/browser/';
 
   terms : BehaviorSubject<Array<string>> = new BehaviorSubject<Array<string>>([]);
   minScore = new BehaviorSubject<number>(0);
@@ -54,7 +57,7 @@ export class TextService {
   }
 
   updateTF(docFreq: Map<string, number>) {
-    return this.http.get('/assets/tf.csv', {responseType: 'text' as 'json'}).pipe(
+    return this.http.get(`${this.deployUrl}/assets/tf.csv`, {responseType: 'text' as 'json'}).pipe(
       tap((v) => {
         console.log('got csv');
         const csv = v as string;
@@ -81,7 +84,7 @@ export class TextService {
   }
 
   updateText(): Observable<string> {
-    return this.http.get<string>('assets/test.txt', {responseType: 'text' as 'json'}).pipe(tap(v => this.internalText$.next(v as string)));
+    return this.http.get<string>(`${this.deployUrl}/assets/test.txt`, {responseType: 'text' as 'json'}).pipe(tap(v => this.internalText$.next(v as string)));
   }
 
   private asHtml(text: string) {
