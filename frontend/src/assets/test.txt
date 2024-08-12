@@ -3,8 +3,6 @@ Project_Name:   "Bits&Pieces"
 Prototype_02:   "Text degradation experiment - 01”
 Location:       "Minus_one, New_Institute, Rotterdam, Netherlands.”
 
-Description:
-
 What if digital files were made to degrade?
 The ageing process of data differs substantially from that of materials in the natural world, so much so that it is thought not to degrade over time. Digital media needs energy, and because digital files are not affected by time, they’re usually left in a constant state of energy consumption. It might not seem like a big deal, but still, data storage facilities worldwide already surpass the airline industry in producing carbon emissions due to the energy consumed in this endless process.
 
