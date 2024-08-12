@@ -16,7 +16,7 @@ export class TextService {
   private termToDocFreq = new Map<string, number>();
   private tfidf = new Map<string, number>();
 
-  private readonly deployUrl = 'static/text_decay_api_app/browser/';
+  private readonly deployUrl = 'static/text_decay_api_app/browser';
 
   terms : BehaviorSubject<Array<string>> = new BehaviorSubject<Array<string>>([]);
   minScore = new BehaviorSubject<number>(0);
@@ -49,6 +49,9 @@ export class TextService {
       min = curTfidf < min ? curTfidf : min;
       max = curTfidf > max ? curTfidf : max;
       this.tfidf.set(term, curTfidf);
+    }
+    for (const term of this.tfidf.keys()) {
+      this.tfidf.set(term, this.mapValue(this.tfidf.get(term)!, min, max, 100, 1000));
     }
     this.terms.next(Array.from(this.tfidf.keys()));
     this.minScore.next(min);
@@ -122,5 +125,9 @@ export class TextService {
     console.log(this.canonicalToInstance);
     console.log(this.termToDocFreq);
     return this.termToDocFreq;
+  }
+
+  private mapValue(x: number, oldMin: number, oldMax: number, newMin: number, newMax: number) {
+    return (x - oldMin / (oldMax - oldMin)) * (newMax - newMin) + newMin;
   }
 }

@@ -11,7 +11,8 @@ import {
   interval,
   map,
   switchMap,
-  shareReplay
+  shareReplay,
+  timer,
 } from "rxjs";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 
@@ -32,7 +33,7 @@ export class AppComponent implements OnInit {
     switchMap(() => this.sensorApi.getSensorRead()),
     shareReplay(),
     tap(v => {
-      const noise = Math.random() > 0.6 ? -1 : 1;
+      const noise = Math.random() > 0.9 ? -1 : 1;
       const dir = v ? 1 : -1;
       const change = dir * noise;
       this.decayFactor = Math.max(this.decayFactor + change, 0);
@@ -46,22 +47,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.updateImages();
-  }
-
-  updateImages() {
-    this.route.queryParams.subscribe((p) => {
-      console.log(p);
-      // this.imagesApi.getImagesList(p['dir']).subscribe(v => void this.curImages.next(v))
-    })
   }
 
   asHtml() {
     return this.text.asHtml$;
-  }
-
-  updateViewer(imageData: ImageData) {
-
   }
 
   randomOffset(interval: number, unit: string = 'px'): string {
@@ -70,24 +59,21 @@ export class AppComponent implements OnInit {
 
   private updateClasses() {
     for (const term of this.text.terms.value) {
-      const normalizedScore = this.mapValue(this.text.getTFIDF(term), this.text.minScore.value, this.text.maxScore.value, 0, 1000);
       try {
         for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
           // console.log(read, normalizedScore);
-          if (normalizedScore > this.decayFactor) {
-            e.classList.add('hidden');
-          } else {
-            e.classList.remove('hidden');
-          }
+          timer(Math.random() * 2000).subscribe(() => {
+            if (this.text.getTFIDF(term) > this.decayFactor) {
+              e.classList.add('hidden');
+            } else {
+              e.classList.remove('hidden');
+            }
+          })
         }
       } catch {
 
       }
     }
-  }
-
-  private mapValue(x: number, oldMin: number, oldMax: number, newMin: number, newMax: number) {
-    return (x - oldMin / (oldMax - oldMin)) * (newMax - newMin) + newMin;
   }
 
   getDecayFactor() {
