@@ -53,6 +53,10 @@ export class AppComponent implements OnInit {
     return this.text.asHtml$;
   }
 
+  asciiHeader() {
+    return this.text.asciiHeader$;
+  }
+
   randomOffset(interval: number, unit: string = 'px'): string {
     return `${Math.floor(Math.random() * interval * 2) - interval}${unit}`;
   }

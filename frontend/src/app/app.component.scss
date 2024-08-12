@@ -7,10 +7,18 @@
   height: 100vh;
   overflow: hidden;
   justify-content: center;
-  align-items: center;
+  align-items: start;
 }
 
 .text-container {
   max-width: 600px;
   display: flex;
+}
+
+.ascii-container {
+  margin-bottom: 30px;
+}
+
+.ascii-header {
+  font-size: 8px;
 }

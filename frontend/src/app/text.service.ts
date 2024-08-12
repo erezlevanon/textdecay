@@ -1,7 +1,7 @@
 import {APP_BASE_HREF} from '@angular/common'
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, map, Observable, ReplaySubject, switchMap, tap} from "rxjs";
+import {BehaviorSubject, distinctUntilChanged, map, Observable, ReplaySubject, shareReplay, switchMap, tap} from "rxjs";
 import {compareNumbers} from "@angular/compiler-cli/src/version_helpers";
 
 @Injectable({
@@ -18,10 +18,18 @@ export class TextService {
 
   private readonly deployUrl = 'static/text_decay_api_app/browser';
 
-  terms : BehaviorSubject<Array<string>> = new BehaviorSubject<Array<string>>([]);
+  terms: BehaviorSubject<Array<string>> = new BehaviorSubject<Array<string>>([]);
   minScore = new BehaviorSubject<number>(0);
   maxScore = new BehaviorSubject<number>(Infinity);
   readonly asHtml$ = this.internalText$.pipe(map(t => this.asHtml(t)));
+  readonly asciiHeader$ = this.getAsciiHeader().pipe(
+    map((t) => this.replaceSpaces(t)),
+    shareReplay(),
+    distinctUntilChanged(),
+    tap((t) => {
+      console.log("got header");
+      console.log(t);
+    }));
 
   constructor(private http: HttpClient) {
     this.updateText().pipe(
@@ -34,7 +42,13 @@ export class TextService {
       )
   }
 
-  getTFIDF(term: string) : number {
+  private getAsciiHeader(): Observable<string> {
+    return this.http.get(`${this.deployUrl}/assets/ascii_header_0.txt`, {responseType: 'text' as 'json'}).pipe(map((t) => {
+      return t as string;
+    }))
+  }
+
+  getTFIDF(term: string): number {
     return this.tfidf.get(term) ?? 0;
   }
 
@@ -42,7 +56,7 @@ export class TextService {
     this.tfidf.clear();
     let min = Infinity;
     let max = 0;
-    const sumTerms = Array.from(this.termToDocFreq.values()).reduceRight((a,b) => a+b);
+    const sumTerms = Array.from(this.termToDocFreq.values()).reduceRight((a, b) => a + b);
     for (const term of this.termToDocFreq.keys()) {
       const idf = 1 / (this.termToDocFreq.get(term)! / sumTerms);
       const curTfidf = this.termToFreq.get(term)! * idf;
@@ -51,7 +65,7 @@ export class TextService {
       this.tfidf.set(term, curTfidf);
     }
     for (const term of this.tfidf.keys()) {
-      this.tfidf.set(term, this.mapValue(this.tfidf.get(term)!, min, max, 100, 1000));
+      this.tfidf.set(term, this.mapValue(this.tfidf.get(term)!, min, max, 50, 1000));
     }
     this.terms.next(Array.from(this.tfidf.keys()));
     this.minScore.next(min);
@@ -129,5 +143,9 @@ export class TextService {
 
   private mapValue(x: number, oldMin: number, oldMax: number, newMin: number, newMax: number) {
     return (x - oldMin / (oldMax - oldMin)) * (newMax - newMin) + newMin;
+  }
+
+  private replaceSpaces(text: string) {
+    return text.replaceAll(' ', '&nbsp');
   }
 }

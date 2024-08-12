@@ -1,5 +1,9 @@
 <div>
- {{ (latestRead | async) ? "you are standing here." : "you are not standing here." }}
+  <div class="ascii-container">
+    <div class="ascii-header" [innerHTML]="(asciiHeader() | async) ?? '' ">
+    </div>
+  </div>
+  {{ (latestRead | async) ? "you are standing here." : "you are not standing here." }}
   <div class="text-container">
     <div class="actual-text" [innerHTML]="asHtml() | async"></div>
   </div>
