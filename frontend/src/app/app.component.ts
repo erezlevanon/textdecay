@@ -8,12 +8,13 @@ import {
   map,
   switchMap,
   shareReplay,
-  timer, BehaviorSubject, take, withLatestFrom,
+  timer, BehaviorSubject, take, withLatestFrom, delay, distinctUntilChanged,
 } from "rxjs";
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe, formatNumber, NgForOf, NgIf} from "@angular/common";
 import {Title} from "@angular/platform-browser";
 import {environment} from "../environments/environment";
 import {SoundsService} from "./sounds.service";
+import {formatSize} from "@angular-devkit/build-angular/src/tools/webpack/utils/stats";
 
 enum Directions {
   APPEAR = 1,
@@ -25,7 +26,8 @@ const DIRECTION: Directions = Directions.DECAY;
 const DECAY_RATE = 0.01;
 const INITIAL_RESPONSE_TIME_SECOND = 3;
 const SENSOR_READ_TIME = 100;
-const SIGNAL_TO_NOISE = 0.6;;
+const SIGNAL_TO_NOISE = 0.6;
+;
 const ALLOW_FLICKER = true;
 const FANCY_HIDDEN = false;
 
@@ -74,10 +76,10 @@ export class AppComponent implements OnInit {
     if (environment.isDevelopment) {
       this.titleService.setTitle("🐣 " + this.titleService.getTitle());
     }
-    this.text.documentHeaderAsHtml$.pipe(take(1)).subscribe(
+    this.text.documentHeaderAsHtml$.pipe(take(1), delay(1000)).subscribe(
       (v) => {
         this.numTerms = this.countTerms();
-        console.log("count", this.numTerms);
+        console.log("num words", this.numTerms);
       }
     );
   }
@@ -88,7 +90,7 @@ export class AppComponent implements OnInit {
 
   documentHeaderAsHtml() {
     return this.text.documentHeaderAsHtml$.pipe(
-      withLatestFrom(this.displaySize),
+      withLatestFrom(this.displaySize.pipe(distinctUntilChanged())),
       map(([text, displaySize]) => text.replaceAll("18kb", displaySize)));
   }
 
@@ -148,7 +150,17 @@ export class AppComponent implements OnInit {
   }
 
   private updateDisplaySize(shownCount: number) {
-    this.displaySize.next(shownCount / this.numTerms + "");
+    const minSize = 263;
+    const maxDisplaySize = 18000;
+    let curDisplaySize = Math.ceil(maxDisplaySize * shownCount / this.numTerms);
+    let unit = 'kb'
+    if (curDisplaySize < 1100) {
+      unit = 'b';
+      curDisplaySize += minSize;
+    } else {
+      curDisplaySize = curDisplaySize / 1000;
+    }
+    this.displaySize.next(`${formatNumber(curDisplaySize, "en-US", "1.0-1")}${unit}`);
   }
 
   getDecayFactor() {
