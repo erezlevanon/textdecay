@@ -18,11 +18,14 @@
 .ascii-container {
   margin-bottom: 20px;
   margin-top: 20px;
+  display: flex;
+  justify-content: center;
 }
 
 .ascii-header {
   font-size: 8px;
   color: lightgreen;
+  width: min-content;
 }
 
 .presence-indicator {

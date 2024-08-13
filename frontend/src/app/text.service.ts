@@ -138,12 +138,13 @@ export class TextService {
     for (let canonical of this.termToDocFreq.keys()) {
       for (let wordInstance of this.canonicalToInstance.get(canonical)!) {
         if (seen.has(canonical)) continue;
+        const nonSplitter = '[^a-zA-Z0-9\'’]';
         seen.add(canonical);
-        const r = new RegExp(`(^|\\W|[_])(${wordInstance})(\\W|$|[_])`, 'gi');
+        const r = new RegExp(`(${nonSplitter})(${wordInstance})(${nonSplitter})`, 'gi');
         text = text.replaceAll(r, `$1<span class="${canonical}">$2</span>$3`);
-        const rStart = new RegExp(`^(${wordInstance})(\\W|$|[_])`, 'gi');
+        const rStart = new RegExp(`^(${wordInstance})(${nonSplitter}|$)`, 'gi');
         text = text.replaceAll(rStart, `<span class="${canonical}">$1</span>$2`);
-        const rEnd = new RegExp(`(^|\\W|[_])(${wordInstance})$`, 'gi');
+        const rEnd = new RegExp(`(${nonSplitter})(${wordInstance})$`, 'gi');
         text = text.replaceAll(rEnd, `$1<span class="${canonical}">$2</span>`);
       }
     }
