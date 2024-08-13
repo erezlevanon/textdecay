@@ -1,10 +1,13 @@
 <div>
+  <div class="document-header-container">
+    <div class="document-header-text" [innerHTML]="documentHeaderAsHtml() | async"></div>
+  </div>
   <div class="ascii-container">
     <div class="ascii-header" [innerHTML]="(asciiHeader() | async) ?? '' ">
     </div>
   </div>
   <div class="presence-indicator blink">{{ (latestRead | async) ? "you are standing here." : "you are not standing here." }}</div>
-  <div class="text-container">
-    <div class="actual-text" [innerHTML]="asHtml() | async"></div>
+  <div class="body-text-container">
+    <div class="body-text" [innerHTML]="bodyTextAsHtml() | async"></div>
   </div>
 </div>

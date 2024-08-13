@@ -1,7 +1,17 @@
 import {APP_BASE_HREF} from '@angular/common'
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, distinctUntilChanged, map, Observable, ReplaySubject, shareReplay, switchMap, tap} from "rxjs";
+import {
+  BehaviorSubject, combineLatest,
+  combineLatestAll,
+  distinctUntilChanged,
+  map,
+  Observable,
+  ReplaySubject,
+  shareReplay,
+  switchMap,
+  tap, zip
+} from "rxjs";
 import {compareNumbers} from "@angular/compiler-cli/src/version_helpers";
 
 @Injectable({
@@ -9,43 +19,67 @@ import {compareNumbers} from "@angular/compiler-cli/src/version_helpers";
 })
 export class TextService {
 
-  private readonly internalText$: ReplaySubject<string> = new ReplaySubject()
+  private readonly deployUrl = 'static/text_decay_api_app/browser';
+
+  private readonly internalDocumentHeader$: Observable<string> = this.getDocumentHeader();
+  private readonly internalBodyText$: Observable<string> = this.getBodyText();
+  readonly asciiHeader$ = this.getAsciiHeader();
 
   private canonicalToInstance: Map<string, Set<string>> = new Map();
   private termToFreq = new Map<string, number>();
   private termToDocFreq = new Map<string, number>();
-  private tfidf = new Map<string, number>();
 
-  private readonly deployUrl = 'static/text_decay_api_app/browser';
+  private tfidf = new Map<string, number>();
 
   terms: BehaviorSubject<Array<string>> = new BehaviorSubject<Array<string>>([]);
   minScore = new BehaviorSubject<number>(0);
   maxScore = new BehaviorSubject<number>(Infinity);
-  readonly asHtml$ = this.internalText$.pipe(map(t => this.asHtml(t)));
-  readonly asciiHeader$ = this.getAsciiHeader().pipe(
-    map((t) => this.replaceSpaces(t)),
-    shareReplay(),
-    distinctUntilChanged(),
-    tap((t) => {
-      console.log("got header");
-      console.log(t);
-    }));
+  private readonly prepareMetadata$ = this.prepareMetadata();
+  readonly textBodyAsHml$ = this.prepareMetadata$.pipe(
+    switchMap(() => this.internalBodyText$),
+    map(t => this.asHtml(t))
+  );
+  readonly documentHeaderAsHtml$ = this.prepareMetadata$.pipe(
+    switchMap(() => this.internalDocumentHeader$),
+    map(t => this.asHtml(t))
+  );
 
   constructor(private http: HttpClient) {
-    this.updateText().pipe(
+  }
+
+  private prepareMetadata() {
+    return combineLatest([this.internalBodyText$, this.internalDocumentHeader$]).pipe(
+      map(([a, b]) => a + " " + b),
       map((t: string) => this.countWords(t)),
       switchMap((docFreq: Map<string, number>) => this.updateTF(docFreq)),
-      map(() => this.updateTFIDF()))
-      .subscribe(
-        () => {
-        }
-      )
+      map(() => this.updateTFIDF()),
+      shareReplay());
   }
 
   private getAsciiHeader(): Observable<string> {
     return this.http.get(`${this.deployUrl}/assets/ascii_header_0.txt`, {responseType: 'text' as 'json'}).pipe(map((t) => {
       return t as string;
-    }))
+    })).pipe(
+      map((t) => this.replaceSpaces(t)),
+      shareReplay(),
+      distinctUntilChanged(),
+      tap((t) => {
+        console.log("got ascii header");
+      }));
+  }
+
+  private getBodyText(): Observable<string> {
+    return this.http.get<string>(`${this.deployUrl}/assets/test.txt`, {responseType: 'text' as 'json'}).pipe(
+      tap(() => void console.log('got body text')),
+      shareReplay()
+    );
+  }
+
+  private getDocumentHeader(): Observable<string> {
+    return this.http.get<string>(`${this.deployUrl}/assets/file_header.txt`, {responseType: 'text' as 'json'}).pipe(
+      tap(() => void console.log('got document header')),
+      shareReplay()
+    );
   }
 
   getTFIDF(term: string): number {
@@ -70,7 +104,6 @@ export class TextService {
     this.terms.next(Array.from(this.tfidf.keys()));
     this.minScore.next(min);
     this.maxScore.next(max);
-    console.log(this.tfidf);
   }
 
   updateTF(docFreq: Map<string, number>) {
@@ -100,15 +133,9 @@ export class TextService {
     );
   }
 
-  updateText(): Observable<string> {
-    return this.http.get<string>(`${this.deployUrl}/assets/test.txt`, {responseType: 'text' as 'json'}).pipe(tap(v => this.internalText$.next(v as string)));
-  }
-
   private asHtml(text: string) {
-    const wordCounts = this.countWords(text);
-    text = text.replaceAll("\n", "<br>");
     const seen = new Set<string>();
-    for (let canonical of wordCounts.keys()) {
+    for (let canonical of this.termToDocFreq.keys()) {
       for (let wordInstance of this.canonicalToInstance.get(canonical)!) {
         if (seen.has(canonical)) continue;
         seen.add(canonical);
@@ -124,8 +151,6 @@ export class TextService {
   }
 
   countWords(text: string): Map<string, number> {
-    this.termToDocFreq.clear();
-    this.canonicalToInstance.clear();
     const words = text.split(/[,.;\-—_"=\*\[\]&:\?)(\s]/g).map(word => {
       const canonical = word.toLowerCase();
       this.canonicalToInstance.has(canonical) ? this.canonicalToInstance.get(canonical)!.add(word) : this.canonicalToInstance.set(canonical, new Set([word]));
@@ -136,8 +161,6 @@ export class TextService {
     }
     this.termToDocFreq.delete("");
     this.canonicalToInstance.delete("");
-    console.log(this.canonicalToInstance);
-    console.log(this.termToDocFreq);
     return this.termToDocFreq;
   }
 

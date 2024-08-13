@@ -49,8 +49,12 @@ export class AppComponent implements OnInit {
   ngOnInit() {
   }
 
-  asHtml() {
-    return this.text.asHtml$;
+  bodyTextAsHtml() {
+    return this.text.textBodyAsHml$;
+  }
+
+  documentHeaderAsHtml() {
+    return this.text.documentHeaderAsHtml$;
   }
 
   asciiHeader() {
