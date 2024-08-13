@@ -8,7 +8,7 @@ import {
   map,
   switchMap,
   shareReplay,
-  timer,
+  timer, BehaviorSubject, take, withLatestFrom,
 } from "rxjs";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 
@@ -18,11 +18,12 @@ enum Directions {
 }
 
 // Playable constants
-const DIRECTION: Directions = Directions.APPEAR;
+const DIRECTION: Directions = Directions.DECAY;
 const DECAY_RATE = 0.01;
 const INITIAL_RESPONSE_TIME_SECOND = 3;
 const SENSOR_READ_TIME = 100;
-const SIGNAL_TO_NOISE = 0.8;
+const SIGNAL_TO_NOISE = 1;
+const ALLOW_FLICKER = true;
 const FANCY_HIDDEN = false;
 
 // Calculated constants
@@ -58,12 +59,21 @@ export class AppComponent implements OnInit {
     tap(() => this.updateClasses()));
 
   private decayFactor = INITIAL_DECAY_FACTOR;
+  private numTerms = 0;
+  private readonly displaySize = new BehaviorSubject<string>("");
 
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute, private elem: ElementRef) {
     this.latestRead.subscribe();
   }
 
   ngOnInit() {
+    this.text.documentHeaderAsHtml$.pipe(take(1)).subscribe(
+      (v) => {
+        console.log(v);
+        this.numTerms = this.countTerms();
+        console.log("counted terms", this.numTerms);
+      }
+    );
   }
 
   bodyTextAsHtml() {
@@ -71,7 +81,9 @@ export class AppComponent implements OnInit {
   }
 
   documentHeaderAsHtml() {
-    return this.text.documentHeaderAsHtml$;
+    return this.text.documentHeaderAsHtml$.pipe(
+      withLatestFrom(this.displaySize),
+      map(([text, displaySize]) => text.replaceAll("18kb", displaySize)));
   }
 
   asciiHeader() {
@@ -82,13 +94,28 @@ export class AppComponent implements OnInit {
     return `${Math.floor(Math.random() * interval * 2) - interval}${unit}`;
   }
 
+  private countTerms() {
+    let res = 0;
+    for (const term of this.text.terms.value) {
+      try {
+        res += this.elem.nativeElement.querySelectorAll(`.${term}`).length;
+      } catch {
+
+      }
+    }
+    return res;
+  }
+
   private updateClasses() {
     let i = 0;
+    let shownCount = 0;
     for (const term of this.text.terms.value) {
       try {
         for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
+          const shouldHide = this.shouldHide(term);
+          if (!shouldHide) shownCount++;
           timer(Math.random() * 2000).subscribe(() => {
-            if (this.text.getTFIDF(term) > this.decayFactor) {
+            if (ALLOW_FLICKER ? shouldHide : this.shouldHide(term)) {
               e.classList.add('hidden');
               if (FANCY_HIDDEN) {
                 e.classList.add(`hidden-${(term.length + i) % 10}`);
@@ -103,6 +130,15 @@ export class AppComponent implements OnInit {
 
       }
     }
+    this.updateDisplaySize(shownCount);
+  }
+
+  private shouldHide(term: string) : boolean {
+    return this.text.getTFIDF(term) > this.decayFactor;
+  }
+
+  private updateDisplaySize(shownCount: number) {
+    this.displaySize.next(shownCount / this.numTerms + "");
   }
 
   getDecayFactor() {
