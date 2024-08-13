@@ -13,6 +13,7 @@ import {
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {Title} from "@angular/platform-browser";
 import {environment} from "../environments/environment";
+import {SoundsService} from "./sounds.service";
 
 enum Directions {
   APPEAR = 1,
@@ -24,7 +25,7 @@ const DIRECTION: Directions = Directions.DECAY;
 const DECAY_RATE = 0.01;
 const INITIAL_RESPONSE_TIME_SECOND = 3;
 const SENSOR_READ_TIME = 100;
-const SIGNAL_TO_NOISE = 1;
+const SIGNAL_TO_NOISE = 0.6;;
 const ALLOW_FLICKER = true;
 const FANCY_HIDDEN = false;
 
@@ -64,7 +65,8 @@ export class AppComponent implements OnInit {
   private numTerms = 0;
   private readonly displaySize = new BehaviorSubject<string>("");
 
-  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute, private titleService: Title, private elem: ElementRef) {
+  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService,
+              private readonly sounds: SoundsService, private readonly titleService: Title, private elem: ElementRef) {
     this.latestRead.subscribe();
   }
 
@@ -75,7 +77,7 @@ export class AppComponent implements OnInit {
     this.text.documentHeaderAsHtml$.pipe(take(1)).subscribe(
       (v) => {
         this.numTerms = this.countTerms();
-        console.log("counted", this.numTerms);
+        console.log("count", this.numTerms);
       }
     );
   }
@@ -119,6 +121,7 @@ export class AppComponent implements OnInit {
           const shouldHide = this.shouldHide(term);
           if (!shouldHide) shownCount++;
           timer(Math.random() * 2000).subscribe(() => {
+            let size_before = e.classList.length;
             if (ALLOW_FLICKER ? shouldHide : this.shouldHide(term)) {
               e.classList.add('hidden');
               if (FANCY_HIDDEN) {
@@ -127,7 +130,10 @@ export class AppComponent implements OnInit {
             } else {
               e.classList.remove('hidden');
             }
-          })
+            if (size_before < e.classList.length) {
+              this.sounds.click();
+            }
+          });
           i++;
         }
       } catch {
