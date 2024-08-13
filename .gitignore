@@ -5,6 +5,7 @@ output_images
 .idea
 input_images
 *.pt
+**/__pycache__
 /api/.env
 /api/db.sqlite3
 /api/media/*
