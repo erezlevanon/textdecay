@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source source ./.venv/bin/activate
+source ./.venv/bin/activate
 
 cd api
 
