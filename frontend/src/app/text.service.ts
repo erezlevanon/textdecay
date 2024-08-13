@@ -34,6 +34,8 @@ export class TextService {
   terms: BehaviorSubject<Array<string>> = new BehaviorSubject<Array<string>>([]);
   minScore = new BehaviorSubject<number>(0);
   maxScore = new BehaviorSubject<number>(Infinity);
+  static readonly NORMALIZED_MIN = 1;
+  static readonly NORMALIZED_MAX = 1000;
   private readonly prepareMetadata$ = this.prepareMetadata();
   readonly textBodyAsHml$ = this.prepareMetadata$.pipe(
     switchMap(() => this.internalBodyText$),
@@ -99,7 +101,7 @@ export class TextService {
       this.tfidf.set(term, curTfidf);
     }
     for (const term of this.tfidf.keys()) {
-      this.tfidf.set(term, this.mapValue(this.tfidf.get(term)!, min, max, 50, 1000));
+      this.tfidf.set(term, this.mapValue(this.tfidf.get(term)!, min, max, TextService.NORMALIZED_MIN, TextService.NORMALIZED_MAX));
     }
     this.terms.next(Array.from(this.tfidf.keys()));
     this.minScore.next(min);
@@ -166,7 +168,7 @@ export class TextService {
   }
 
   private mapValue(x: number, oldMin: number, oldMax: number, newMin: number, newMax: number) {
-    return (x - oldMin / (oldMax - oldMin)) * (newMax - newMin) + newMin;
+    return ((x - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
   }
 
   private replaceSpaces(text: string) {

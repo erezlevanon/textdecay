@@ -1,4 +1,6 @@
 body, html {
+  display: flex;
+  justify-content: center;
   height: 100%;
   width: 100%;
   margin: 0;
@@ -6,10 +8,6 @@ body, html {
   color: #e7dfe7;
   font-family: KodeMono, monospace;
   font-size: 16px;
-}
-
-.hidden {
-  opacity: 0;
 }
 
 @font-face {
