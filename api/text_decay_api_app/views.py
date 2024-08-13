@@ -1,6 +1,8 @@
 import os.path
 import random
+import time
 
+import gpiozero
 from decouple import config
 from django.shortcuts import render
 from django.contrib.staticfiles.views import serve
@@ -16,10 +18,13 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework import status
 
-from gpiozero import DistanceSensor
+from gpiozero import DistanceSensor, LED
 
 exhibit = config("EXHIBIT", cast=bool)
 if exhibit:
+    LED(pin=23).value = False
+    LED(pin=24).value = False
+    time.sleep(0.1)
     d_sensor = DistanceSensor(trigger=23, echo=24)
 
 
