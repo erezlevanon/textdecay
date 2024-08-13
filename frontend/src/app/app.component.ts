@@ -11,6 +11,8 @@ import {
   timer, BehaviorSubject, take, withLatestFrom,
 } from "rxjs";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {Title} from "@angular/platform-browser";
+import {environment} from "../environments/environment";
 
 enum Directions {
   APPEAR = 1,
@@ -62,16 +64,18 @@ export class AppComponent implements OnInit {
   private numTerms = 0;
   private readonly displaySize = new BehaviorSubject<string>("");
 
-  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute, private elem: ElementRef) {
+  constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService, private readonly route: ActivatedRoute, private titleService: Title, private elem: ElementRef) {
     this.latestRead.subscribe();
   }
 
   ngOnInit() {
+    if (environment.isDevelopment) {
+      this.titleService.setTitle("🐣 " + this.titleService.getTitle());
+    }
     this.text.documentHeaderAsHtml$.pipe(take(1)).subscribe(
       (v) => {
-        console.log(v);
         this.numTerms = this.countTerms();
-        console.log("counted terms", this.numTerms);
+        console.log("counted", this.numTerms);
       }
     );
   }
@@ -133,7 +137,7 @@ export class AppComponent implements OnInit {
     this.updateDisplaySize(shownCount);
   }
 
-  private shouldHide(term: string) : boolean {
+  private shouldHide(term: string): boolean {
     return this.text.getTFIDF(term) > this.decayFactor;
   }
 
