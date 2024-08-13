@@ -113,11 +113,11 @@ export class TextService {
         if (seen.has(canonical)) continue;
         seen.add(canonical);
         const r = new RegExp(`(^|\\W|[_])(${wordInstance})(\\W|$|[_])`, 'gi');
-        text = text.replaceAll(r, `$1<span class="${canonical}">${wordInstance}</span>$3`);
+        text = text.replaceAll(r, `$1<span class="${canonical}">$2</span>$3`);
         const rStart = new RegExp(`^(${wordInstance})(\\W|$|[_])`, 'gi');
-        text = text.replaceAll(rStart, `<span class="${canonical}">${wordInstance}</span>$2`);
+        text = text.replaceAll(rStart, `<span class="${canonical}">$1</span>$2`);
         const rEnd = new RegExp(`(^|\\W|[_])(${wordInstance})$`, 'gi');
-        text = text.replaceAll(rEnd, `$1<span class="${canonical}">${wordInstance}</span>`);
+        text = text.replaceAll(rEnd, `$1<span class="${canonical}">$2</span>`);
       }
     }
     return text.replaceAll("\n", "<br>");
