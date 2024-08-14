@@ -17,4 +17,4 @@ xset s off
 # chromium-browser 'http://127.0.0.1:8000'
 
 # Start qutebrowser
-qutebrowser "127.0.0.1:8000" ':fullscreen --enter'  -s tabs.show never -s statusbar.show never
+qutebrowser "127.0.0.1:8000" ':fullscreen --enter' ':reload -f' -s tabs.show never -s statusbar.show never
