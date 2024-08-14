@@ -23,11 +23,11 @@ enum Directions {
 
 // Playable constants
 const DIRECTION: Directions = Directions.DECAY;
-const DECAY_RATE = 0.01;
+const DECAY_RATE = 0.1;
 const INITIAL_RESPONSE_TIME_SECOND = 3;
-const SENSOR_READ_TIME = 100;
+const SENSOR_READ_TIME = 1000;
 const SIGNAL_TO_NOISE = 0.6;
-;
+
 const ALLOW_FLICKER = true;
 const FANCY_HIDDEN = false;
 
@@ -122,7 +122,7 @@ export class AppComponent implements OnInit {
         for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
           const shouldHide = this.shouldHide(term);
           if (!shouldHide) shownCount++;
-          timer(Math.random() * 2000).subscribe(() => {
+          timer(Math.random() * 4000).subscribe(() => {
             let size_before = e.classList.length;
             if (ALLOW_FLICKER ? shouldHide : this.shouldHide(term)) {
               e.classList.add('hidden');
