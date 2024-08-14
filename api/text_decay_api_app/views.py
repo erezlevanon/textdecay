@@ -1,22 +1,11 @@
-import os.path
-import random
 import time
 
-import gpiozero
 from decouple import config
-from django.shortcuts import render
-from django.contrib.staticfiles.views import serve
 from django.contrib.staticfiles import finders
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django.views.generic import View
 from django.http import HttpResponse
-
-from .serializers import ImagesListSerializer, UploadImageSerializer
-from os import walk
-from django.conf import settings
-from django.core.files.storage import default_storage
-from rest_framework import status
 
 from gpiozero import DistanceSensor, LED
 
