@@ -8,14 +8,14 @@ export class SoundsService {
 
   private readonly clickSound = new Audio();
   private readonly beepSound = new Audio();
-  private readonly volume = 0.8;
+  private readonly volume = 1.0;
 
   constructor() {
     this.clickSound.src = `${environment.deployUrl}/assets/sounds/click.mp3`;
     this.clickSound.load();
     this.beepSound.src = `${environment.deployUrl}/assets/sounds/beep.mp3`;
     this.beepSound.load();
-    this.beepSound.volume = 0.3;
+    this.beepSound.volume = 1.0;
   }
 
   click() {
