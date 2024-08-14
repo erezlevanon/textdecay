@@ -13,9 +13,9 @@ xset s off
 # unclutter -idle 1 -root &
 
 # Start Chromium.
-# chromium-browser --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gesture 'http://127.0.0.1:8000'
+chromium-browser --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gesture 'http://127.0.0.1:8000'
 # chromium-browser --noerrdialogs --autoplay-policy=no-user-gesture 'http://127.0.0.1:8000'
 # chromium-browser 'http://127.0.0.1:8000'
 
 # Start qutebrowser
-qutebrowser "127.0.0.1:8000" ':fullscreen --enter' ':reload -f' -s tabs.show never -s statusbar.show never
+# qutebrowser "127.0.0.1:8000" ':fullscreen --enter' ':reload -f' -s tabs.show never -s statusbar.show never
