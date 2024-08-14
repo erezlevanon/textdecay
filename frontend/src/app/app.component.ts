@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, ElementRef, OnInit} from '@angular/core';
-import {ActivatedRoute, RouterOutlet} from '@angular/router';
 import {SensorApiService} from "./sensor_api.service";
 import {TextService} from "./text.service";
 import {
@@ -8,13 +7,12 @@ import {
   map,
   switchMap,
   shareReplay,
-  timer, BehaviorSubject, take, withLatestFrom, delay, distinctUntilChanged,
+  timer, BehaviorSubject, take, withLatestFrom, delay, distinctUntilChanged, merge,
 } from "rxjs";
 import {AsyncPipe, formatNumber, NgForOf, NgIf} from "@angular/common";
 import {Title} from "@angular/platform-browser";
 import {environment} from "../environments/environment";
 import {SoundsService} from "./sounds.service";
-import {formatSize} from "@angular-devkit/build-angular/src/tools/webpack/utils/stats";
 
 enum Directions {
   APPEAR = 1,
@@ -27,6 +25,9 @@ const DECAY_RATE = 0.1;
 const INITIAL_RESPONSE_TIME_SECOND = 3;
 const SENSOR_READ_TIME = 1000;
 const SIGNAL_TO_NOISE = 0.6;
+
+const BLINK_EVERY_MS = 2000;
+const BLINK_OFF_MS = 300;
 
 const ALLOW_FLICKER = true;
 const FANCY_HIDDEN = false;
@@ -41,7 +42,7 @@ const INITIAL_DECAY_FACTOR = DIRECTION === Directions.APPEAR as Directions ? ALL
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AsyncPipe, NgIf, NgForOf],
+  imports: [AsyncPipe, NgIf, NgForOf],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +67,13 @@ export class AppComponent implements OnInit {
   private decayFactor = INITIAL_DECAY_FACTOR;
   private numTerms = 0;
   private readonly displaySize = new BehaviorSubject<string>("");
+
+  readonly blinkVisibility = merge(
+    timer(0, BLINK_EVERY_MS).pipe(map(() => 1)),
+    timer(BLINK_EVERY_MS - BLINK_OFF_MS, BLINK_EVERY_MS).pipe(map(() => 0)),
+  ).pipe(tap(visible => {
+    if (visible) this.sounds.beep();
+  }));
 
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService,
               private readonly sounds: SoundsService, private readonly titleService: Title, private elem: ElementRef) {

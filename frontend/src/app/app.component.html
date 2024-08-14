@@ -6,7 +6,7 @@
     <div class="ascii-header" [innerHTML]="(asciiHeader() | async) ?? '' ">
     </div>
   </div>
-  <div class="presence-indicator blink">{{ (latestRead | async) ? "you are standing here." : "you are not standing here." }}</div>
+  <div class="presence-indicator" [style]="{opacity: (blinkVisibility | async)}">{{ (latestRead | async) ? "you are standing here." : "you are not standing here." }}</div>
   <div class="body-text-container">
     <div class="body-text" [innerHTML]="bodyTextAsHtml() | async"></div>
   </div>
