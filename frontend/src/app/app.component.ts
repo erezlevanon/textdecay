@@ -75,6 +75,10 @@ export class AppComponent implements OnInit {
     if (visible) this.sounds.beep();
   }));
 
+  readonly blinkText = this.latestRead.pipe(map((read) => {
+    return  read === (DIRECTION === Directions.APPEAR) ? "you are standing here." : "you are not standing here.";
+  }));
+
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService,
               private readonly sounds: SoundsService, private readonly titleService: Title, private elem: ElementRef) {
     this.latestRead.subscribe();
