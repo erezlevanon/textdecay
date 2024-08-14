@@ -39,12 +39,12 @@
   opacity: 0;
 }
 
-@for $i from 1 through 10 {
-  :host ::ng-deep.hidden-#{$i}.hidden {
-    position: relative;
-    top: random(500) - 300 + px;
-    left: random(200) - 100 + px;
-    opacity: math.div($i, 80);
-    color: rgb(random(255), random(255), random(255));
-  }
-}
+//@for $i from 1 through 10 {
+//  :host ::ng-deep.hidden-#{$i}.hidden {
+//    position: relative;
+//    top: random(500) - 300 + px;
+//    left: random(200) - 100 + px;
+//    opacity: math.div($i, 80);
+//    color: rgb(random(255), random(255), random(255));
+//  }
+//}
