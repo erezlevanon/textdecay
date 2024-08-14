@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+xhost +local:
 export DISPLAY=:0
 
 # Disable xset blanking, let xscreensaver handle that.
