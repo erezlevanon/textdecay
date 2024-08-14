@@ -4,5 +4,5 @@ source ./.venv/bin/activate
 
 cd api
 
-python manage.py runserver
+python manage.py runserver --noreload --skip-checks
 
