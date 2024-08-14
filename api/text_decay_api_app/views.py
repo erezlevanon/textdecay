@@ -11,9 +11,16 @@ from gpiozero import DistanceSensor, LED
 
 exhibit = config("EXHIBIT", cast=bool)
 if exhibit:
-    LED(pin=23).value = False
-    LED(pin=24).value = False
-    time.sleep(0.1)
+    if True:
+        # inner scope
+        led0 = LED(23)
+        led0.off()
+        led1 = LED(24)
+        led1.off()
+        time.sleep(0.3)
+        led0.close()
+        led1.close()
+        time.sleep(0.3)
     d_sensor = DistanceSensor(trigger=23, echo=24)
 
 
@@ -32,11 +39,7 @@ class AngularAppView(View):
     def get(self, request, *args, **kwargs):
         try:
             with open(finders.find('text_decay_api_app/browser/index.html')) as file:
-                http_response = HttpResponse(file.read())
-                fake_response = Response(file.read(), content_type='text/html')
-                # print(fake_response.headers)
-                http_response.headers["Access-Control-Allow-Origin"] = "http://localhost:8000"
-                return http_response
+                return HttpResponse(file.read())
         except FileNotFoundError:
             return HttpResponse("Angular build files not found", status=501)
 
