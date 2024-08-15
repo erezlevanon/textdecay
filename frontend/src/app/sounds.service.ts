@@ -15,7 +15,7 @@ export class SoundsService {
     this.clickSound.load();
     this.beepSound.src = `${environment.deployUrl}/assets/sounds/beep.mp3`;
     this.beepSound.load();
-    this.beepSound.volume = 1.0;
+    this.beepSound.volume = 0.8;
   }
 
   click() {

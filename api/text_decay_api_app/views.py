@@ -31,7 +31,7 @@ class ReadSensorViewSet(viewsets.ModelViewSet):
             print('exhibit')
             d = d_sensor.distance
             print('got distance {}'.format(d))
-            return Response(d < 0.5)
+            return Response(d < 0.9)
         return Response(True)
 
 
