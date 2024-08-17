@@ -1,4 +1,5 @@
 export interface Environment {
   deployUrl: string,
-  isDevelopment?: true,
+  isDevelopment?: boolean,
+  mockSensorData?: boolean,
 }
