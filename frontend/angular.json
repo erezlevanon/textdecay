@@ -83,7 +83,7 @@
                 }
               ],
               "outputPath": "../docs/",
-              "deployUrl": "textdecay/",
+              "baseHref": "textdecay/",
               "outputHashing": "none"
             },
             "serving": {
