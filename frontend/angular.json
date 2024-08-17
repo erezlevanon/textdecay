@@ -84,6 +84,7 @@
               ],
               "outputPath": "../docs/",
               "baseHref": "textdecay/",
+              "deployUrl": "",
               "outputHashing": "none"
             },
             "serving": {
