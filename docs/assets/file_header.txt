@@ -1,0 +1,4 @@
+Current file_size: 18kb
+Project_Name:   "Bits&Pieces"
+Prototype_02:   "Text degradation experiment - 01”
+Location:       "Minus_one, New_Institute, Rotterdam, Netherlands.”

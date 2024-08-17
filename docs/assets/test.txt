@@ -1,0 +1,11 @@
+What if digital files were made to degrade?
+The ageing process of data differs substantially from that of materials in the natural world, so much so that it is thought not to degrade over time. Digital media needs energy, and because digital files are not affected by time, they’re usually left in a constant state of energy consumption. It might not seem like a big deal, but still, data storage facilities worldwide already surpass the airline industry in producing carbon emissions due to the energy consumed in this endless process.
+
+
+Imagine if data could decay. What profound effect would this have on digital text files? Will it change how we—the owners, producers, and consumers of digital media — care for our information or value our digital belongings?
+
+
+This prototype is designed to test, explore and speculate on how digital text files might decay over time. [As you’ve probably noticed] The text you are reading now is not static; it adapts and changes based on the time you spend with it and the number of readers engaged with it over time. When left unattended, it will gradually change; fragments will begin to appear or disappear, information will become less or more understandable, and the file size will ultimately shrink until it consumes the least energy possible. You might experience its degradation, where pieces of text will gradually disappear, or you might take part in helping it come back to life by spending time with it.
+
+
+With this prototype, we aim to emphasise the impact of excessive digital production and consumption and the enduring consequences of digital permanence.
