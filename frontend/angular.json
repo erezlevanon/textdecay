@@ -83,7 +83,7 @@
                 }
               ],
               "outputPath": "../docs/",
-              "baseHref": "textdecay/",
+              "baseHref": "http://erezlevanon.github.io/textdecay",
               "deployUrl": "",
               "outputHashing": "none"
             },
