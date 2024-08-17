@@ -1,6 +1,6 @@
 import {Environment} from "./environment.interface";
 
 export const environment : Environment = {
-  deployUrl: '',
+  deployUrl: 'textdecay',
   mockSensorData: true,
 };
