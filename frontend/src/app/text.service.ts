@@ -53,7 +53,7 @@ export class TextService {
   }
 
   private getAsciiHeader(): Observable<string> {
-    return this.http.get(`${environment.deployUrl}/assets/ascii_header_0.txt`, {responseType: 'text' as 'json'}).pipe(map((t) => {
+    return this.http.get(`${environment.deployUrl}assets/ascii_header_0.txt`, {responseType: 'text' as 'json'}).pipe(map((t) => {
       return t as string;
     })).pipe(
       map((t) => this.replaceSpaces(t)),
@@ -65,14 +65,14 @@ export class TextService {
   }
 
   private getBodyText(): Observable<string> {
-    return this.http.get<string>(`${environment.deployUrl}/assets/test.txt`, {responseType: 'text' as 'json'}).pipe(
+    return this.http.get<string>(`${environment.deployUrl}assets/test.txt`, {responseType: 'text' as 'json'}).pipe(
       tap(() => void console.log('got body text')),
       shareReplay()
     );
   }
 
   private getDocumentHeader(): Observable<string> {
-    return this.http.get<string>(`${environment.deployUrl}/assets/file_header.txt`, {responseType: 'text' as 'json'}).pipe(
+    return this.http.get<string>(`${environment.deployUrl}assets/file_header.txt`, {responseType: 'text' as 'json'}).pipe(
       tap(() => void console.log('got document header')),
       shareReplay()
     );
@@ -103,7 +103,7 @@ export class TextService {
   }
 
   updateTF(docFreq: Map<string, number>) {
-    return this.http.get(`${environment.deployUrl}/assets/tf.csv`, {responseType: 'text' as 'json'}).pipe(
+    return this.http.get(`${environment.deployUrl}assets/tf.csv`, {responseType: 'text' as 'json'}).pipe(
       tap((v) => {
         console.log('got csv');
         const csv = v as string;
