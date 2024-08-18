@@ -55,9 +55,14 @@
 
 .body-text-container {
   display: flex;
-  overflow-y: scroll;
+  overflow-y: auto;
   flex-grow: 1;
   max-height: 100%;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .ascii-container {
