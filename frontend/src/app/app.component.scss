@@ -12,6 +12,12 @@
   max-width: calc(100vh * 0.5859375);
 }
 
+.component-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+}
+
 @media only screen and (max-height: 1024px) {
   :host {
     align-items: start;
@@ -50,9 +56,8 @@
 .body-text-container {
   display: flex;
   overflow-y: scroll;
-  flex-basis: 0;
   flex-grow: 1;
-;
+  max-height: 100%;
 }
 
 .ascii-container {
