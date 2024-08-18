@@ -1,10 +1,13 @@
 import {Injectable} from '@angular/core';
 import {environment} from "../environments/environment";
+import {BehaviorSubject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SoundsService {
+
+  private readonly muted = new BehaviorSubject(true);
 
   private readonly clickSound = new Audio();
   private readonly beepSound = new Audio();
@@ -19,19 +22,35 @@ export class SoundsService {
   }
 
   click() {
-    const tempSound: HTMLAudioElement = this.clickSound.cloneNode() as HTMLAudioElement;
-    tempSound.volume = this.volume;
+    if (!this.muted.value) {
+      const tempSound: HTMLAudioElement = this.clickSound.cloneNode() as HTMLAudioElement;
+      tempSound.volume = this.volume;
 
-    tempSound.onended = () => this.clearSound(tempSound);
-    tempSound.play().catch(() => this.clearSound(tempSound));
+      tempSound.onended = () => this.clearSound(tempSound);
+      tempSound.play().catch(() => this.clearSound(tempSound));
+    }
   }
 
   private clearSound(audio: HTMLAudioElement) {
-     audio.remove();
-     audio.srcObject = null;
+    audio.remove();
+    audio.srcObject = null;
   }
 
   beep() {
-    this.beepSound.play();
+    if (!this.muted.value) {
+      this.beepSound.play();
+    }
+  }
+
+  setMuted(muted: boolean) {
+    this.muted.next(muted);
+  }
+
+  getMuted() {
+    return this.muted;
+  }
+
+  toggleMuted() {
+    this.setMuted(!this.getMuted().value);
   }
 }

@@ -10,6 +10,7 @@
   align-items: center;
   background-color: black;
   max-width: calc(100vh * 0.5859375);
+  position: relative;
 }
 
 .component-container {
@@ -58,9 +59,11 @@
   overflow-y: auto;
   flex-grow: 1;
   max-height: 100%;
+
   ::-webkit-scrollbar {
     display: none;
   }
+
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -85,4 +88,11 @@
 
 :host ::ng-deep.hidden {
   opacity: 0;
+}
+
+.audio-button {
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 0;
 }
