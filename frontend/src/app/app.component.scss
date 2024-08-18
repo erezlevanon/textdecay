@@ -5,16 +5,59 @@
   flex-grow: 1;
   width: 100%;
   max-height: 100vh;
-  min-height: 100vh;
-  height: 100vh;
   overflow: hidden;
   justify-content: center;
-  align-items: start;
-  max-width: 600px;
+  align-items: center;
+  background-color: black;
+  max-width: calc(100vh * 0.5859375);
+}
+
+.component-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+}
+
+@media only screen and (max-height: 1024px) {
+  :host {
+    align-items: start;
+  }
+}
+
+@media only screen and (height: 1024px) and (width: 600px) {
+  .ascii-header {
+    font-size: 8px;
+  }
+
+  .body-text-container .body-text, :host .presence-indicator {
+    font-size: 16px;
+  }
+}
+
+@media only screen and (max-width: calc(100vh * 0.5859375)) {
+  :host {
+    align-items: start;
+    max-width: 100%;
+
+    .ascii-header {
+      font-size: 1.34vw;
+    }
+
+    .document-header-text {
+      font-size: 2.65vw;
+    }
+  }
+}
+
+.body-text, .document-header-text, .presence-indicator {
+  font-size: 1.45vh;
 }
 
 .body-text-container {
   display: flex;
+  overflow-y: scroll;
+  flex-grow: 1;
+  max-height: 100%;
 }
 
 .ascii-container {
@@ -25,7 +68,7 @@
 }
 
 .ascii-header {
-  font-size: 8px;
+  font-size: 0.783649vh;
   color: lightgreen;
   width: min-content;
 }
@@ -38,13 +81,3 @@
 :host ::ng-deep.hidden {
   opacity: 0;
 }
-
-//@for $i from 1 through 10 {
-//  :host ::ng-deep.hidden-#{$i}.hidden {
-//    position: relative;
-//    top: random(500) - 300 + px;
-//    left: random(200) - 100 + px;
-//    opacity: math.div($i, 80);
-//    color: rgb(random(255), random(255), random(255));
-//  }
-//}
