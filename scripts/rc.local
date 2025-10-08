@@ -18,6 +18,14 @@ if [ "$_IP" ]; then
   printf "My IP address is %s\n" "$_IP"
 fi
 
+# Wait for the GUI and audio system to be ready
+sleep 10
+
+# Set the environment for GUI and audio
+export DISPLAY=:0
+export XAUTHORITY=/home/yotamerez/.Xauthority
+export PULSE_SERVER=unix:/run/user/$(id -u yotamerez)/pulse/native
+
 (
    cd /home/yotamerez/textdecay/
    sudo -H -u yotamerez ./scripts/startup.sh

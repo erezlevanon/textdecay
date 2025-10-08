@@ -15,7 +15,8 @@
 Description=/etc/rc.local Compatibility
 Documentation=man:systemd-rc-local-generator(8)
 ConditionFileIsExecutable=/etc/rc.local
-After=network.target pigpiod.service
+After=network.target pigpiod.service sound.target
+Wants=sound.target
 
 [Service]
 Type=forking
