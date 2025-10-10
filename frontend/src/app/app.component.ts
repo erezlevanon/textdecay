@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit} from '@angular/core';
 import {SensorApiService} from "./sensor_api.service";
 import {TextService} from "./text.service";
 import {
@@ -7,7 +7,7 @@ import {
   map,
   switchMap,
   shareReplay,
-  timer, BehaviorSubject, take, withLatestFrom, delay, distinctUntilChanged, merge,
+  timer, BehaviorSubject, take, withLatestFrom, delay, distinctUntilChanged, merge, Subject, bufferCount, filter,
 } from "rxjs";
 import {AsyncPipe, formatNumber, NgForOf, NgIf} from "@angular/common";
 import {Title} from "@angular/platform-browser";
@@ -37,6 +37,10 @@ const READS_TO_START = INITIAL_RESPONSE_TIME_SECOND * 1000 / SENSOR_READ_TIME;
 const ALLOWED_MIN = TextService.NORMALIZED_MIN * (1 - DECAY_RATE) ** READS_TO_START;
 const ALLOWED_MAX = TextService.NORMALIZED_MAX * (1 + DECAY_RATE) ** READS_TO_START;
 const INITIAL_DECAY_FACTOR = DIRECTION === Directions.APPEAR as Directions ? ALLOWED_MIN : ALLOWED_MAX;
+
+// Close window counter
+const CONSECUTIVE_CLICKS_REQUIRED = 5;
+const MAX_TIME_BETWEEN_CLICKS_MS = 800;
 
 
 @Component({
@@ -76,12 +80,17 @@ export class AppComponent implements OnInit {
   }));
 
   readonly blinkText = this.latestRead.pipe(map((read) => {
-    return  read === (DIRECTION === Directions.APPEAR) ? "you are standing here." : "you are not standing here.";
+    return read === (DIRECTION === Directions.APPEAR) ? "you are standing here." : "you are not standing here.";
   }));
+
+  // Close tab after 5 consecutive clicks.
+  // 1. Subject to capture click events
+  private readonly click$ = new Subject<MouseEvent>();
 
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService,
               private readonly sounds: SoundsService, private readonly titleService: Title, private elem: ElementRef) {
     this.latestRead.subscribe();
+    this.setupConsecutiveClickWatcher();
   }
 
   ngOnInit() {
@@ -177,5 +186,32 @@ export class AppComponent implements OnInit {
 
   getDecayFactor() {
     return this.decayFactor;
+  }
+
+  // 2. HostListener to capture clicks on the component's host element
+  @HostListener('click', ['$event'])
+  onClick(event: MouseEvent) {
+    this.click$.next(event);
+  }
+
+  private setupConsecutiveClickWatcher(): void {
+    this.click$.pipe(
+      // 1. Group the clicks into buffers of 5
+      bufferCount(CONSECUTIVE_CLICKS_REQUIRED, 1),
+      // 2. Check the time difference between the first and last click in the buffer
+      map(clicks => {
+        return clicks.every((v, i) => i === 0 ? true : clicks[i].timeStamp - clicks[i - 1].timeStamp < MAX_TIME_BETWEEN_CLICKS_MS);
+      }),
+      // 3. Only pass through if the time difference is less than the max allowed interval for the group
+      filter(v => v),
+      take(1),
+    ).subscribe(() => {
+      // 4. If the filter passes, 5 consecutive clicks have occurred quickly
+      console.log('5 consecutive clicks detected! Closing tab...');
+      // To close the tab/window, you use window.close()
+      // This will only work if the tab/window was opened by a script (e.g., window.open()),
+      // which is a browser security feature. Otherwise, it will just fail silently.
+      window.close();
+    });
   }
 }
