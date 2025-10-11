@@ -1,37 +1,62 @@
 import {Injectable} from '@angular/core';
-import {environment} from "../environments/environment";
+import {environment} from '../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class SoundsService {
+  private context = new AudioContext();
 
-  private readonly clickSound = new Audio();
-  private readonly beepSound = new Audio();
-  private readonly volume = 1.0;
+  private clickBuffer: AudioBuffer | null = null;
+  private beepBuffer: AudioBuffer | null = null;
+
+  private volume = 1.0;
 
   constructor() {
-    this.clickSound.src = `${environment.deployUrl}/assets/sounds/click.mp3`;
-    this.clickSound.load();
-    this.beepSound.src = `${environment.deployUrl}/assets/sounds/beep.mp3`;
-    this.beepSound.load();
-    this.beepSound.volume = 0.8;
+    // Preload sounds
+    this.loadSound(`${environment.deployUrl}/assets/sounds/click.mp3`)
+      .then(buffer => this.clickBuffer = buffer)
+      .catch(() => console.warn('Failed to load click sound'));
+
+    this.loadSound(`${environment.deployUrl}/assets/sounds/beep.mp3`)
+      .then(buffer => this.beepBuffer = buffer)
+      .catch(() => console.warn('Failed to load beep sound'));
+
+    // Resume context on first interaction (needed in modern browsers)
+    window.addEventListener('click', () => this.resumeContext(), {once: true});
+  }
+
+  private async loadSound(url: string): Promise<AudioBuffer> {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    return await this.context.decodeAudioData(arrayBuffer);
+  }
+
+  private resumeContext() {
+    if (this.context.state === 'suspended') {
+      this.context.resume().then(() => {
+        console.log('AudioContext resumed');
+      });
+    }
+  }
+
+  private playBuffer(buffer: AudioBuffer | null, volume: number = 1.0) {
+    if (!buffer) return;
+
+    const source = this.context.createBufferSource();
+    const gainNode = this.context.createGain();
+
+    gainNode.gain.value = volume;
+
+    source.buffer = buffer;
+    source.connect(gainNode);
+    gainNode.connect(this.context.destination);
+    source.start();
   }
 
   click() {
-    const tempSound: HTMLAudioElement = this.clickSound.cloneNode() as HTMLAudioElement;
-    tempSound.volume = this.volume;
-
-    tempSound.onended = () => this.clearSound(tempSound);
-    tempSound.play().catch(() => this.clearSound(tempSound));
-  }
-
-  private clearSound(audio: HTMLAudioElement) {
-     audio.remove();
-     audio.srcObject = null;
+    this.playBuffer(this.clickBuffer, this.volume);
   }
 
   beep() {
-    this.beepSound.play();
+    this.playBuffer(this.beepBuffer, this.volume * 0.8); // quieter beep
   }
 }
