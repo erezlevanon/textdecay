@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit, OnDestroy} from '@angular/core';
 import {SensorApiService} from "./sensor_api.service";
 import {TextService} from "./text.service";
 import {
@@ -7,12 +7,23 @@ import {
   map,
   switchMap,
   shareReplay,
-  timer, BehaviorSubject, take, withLatestFrom, delay, distinctUntilChanged, merge, Subject, bufferCount, filter,
+  combineLatest,
+  timer,
+  BehaviorSubject,
+  take,
+  delay,
+  distinctUntilChanged,
+  merge,
+  Subject,
+  bufferCount,
+  filter,
+  takeUntil,
 } from "rxjs";
 import {AsyncPipe, formatNumber, NgForOf, NgIf} from "@angular/common";
 import {Title} from "@angular/platform-browser";
 import {environment} from "../environments/environment";
 import {SoundsService} from "./sounds.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum Directions {
   APPEAR = 1,
@@ -51,14 +62,16 @@ const MAX_TIME_BETWEEN_CLICKS_MS = 800;
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'decaying_storage_frontend';
+
+  private destroy$ = new Subject<void>();
 
   private readonly interval = interval(SENSOR_READ_TIME);
   readonly latestRead = this.interval.pipe(
     switchMap(() => this.sensorApi.getSensorRead()),
     map(v => DIRECTION === Directions.APPEAR ? v : !v),
-    shareReplay(),
+    shareReplay(1),
     tap(v => {
       const noise = Math.random() > SIGNAL_TO_NOISE ? -1 : 1;
       const dir = (v ? 1 : -1) * DIRECTION;
@@ -66,7 +79,10 @@ export class AppComponent implements OnInit {
       const directionalChange = DIRECTION === Directions.APPEAR ? 1 + change : 1 - change;
       this.decayFactor = Math.min(Math.max(this.decayFactor * directionalChange, ALLOWED_MIN), ALLOWED_MAX);
     }),
-    tap(() => this.updateClasses()));
+    tap(() => {
+      this.updateClasses();
+      this.updateSizeOnScreen();
+    }));
 
   private decayFactor = INITIAL_DECAY_FACTOR;
   private numTerms = 0;
@@ -83,26 +99,27 @@ export class AppComponent implements OnInit {
     return read === (DIRECTION === Directions.APPEAR) ? "you are standing here." : "you are not standing here.";
   }));
 
-  // Close tab after 5 consecutive clicks.
-  // 1. Subject to capture click events
+  private termToElements = new Map<string, any>();
+  private idToVisibility = new Map<string, boolean>();
+
+  // To close tab after 5 consecutive clicks.
   private readonly click$ = new Subject<MouseEvent>();
 
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService,
               private readonly sounds: SoundsService, private readonly titleService: Title, private elem: ElementRef) {
-    this.latestRead.subscribe();
+    this.latestRead.pipe(takeUntil(this.destroy$)).subscribe();
     this.setupConsecutiveClickWatcher();
+    this.displaySize.pipe(distinctUntilChanged(), takeUntilDestroyed()).subscribe(v => {
+      if (!this.termToElements.get('18kb')?.length) return;
+      this.termToElements.get('18kb')[0].innerHTML = v;
+    });
   }
 
   ngOnInit() {
     if (environment.isDevelopment) {
       this.titleService.setTitle("🐣 " + this.titleService.getTitle());
     }
-    this.text.documentHeaderAsHtml$.pipe(take(1), delay(1000)).subscribe(
-      (v) => {
-        this.numTerms = this.countTerms();
-        console.log("num words", this.numTerms);
-      }
-    );
+    this.cacheTermElements();
   }
 
   bodyTextAsHtml() {
@@ -110,9 +127,7 @@ export class AppComponent implements OnInit {
   }
 
   documentHeaderAsHtml() {
-    return this.text.documentHeaderAsHtml$.pipe(
-      withLatestFrom(this.displaySize.pipe(distinctUntilChanged())),
-      map(([text, displaySize]) => text.replaceAll("18kb", displaySize)));
+    return this.text.documentHeaderAsHtml$;
   }
 
   asciiHeader() {
@@ -123,51 +138,78 @@ export class AppComponent implements OnInit {
     return `${Math.floor(Math.random() * interval * 2) - interval}${unit}`;
   }
 
-  private countTerms() {
-    let res = 0;
-    for (const term of this.text.terms.value) {
-      try {
-        res += this.elem.nativeElement.querySelectorAll(`.${term}`).length;
-      } catch {
-
+  // Also adds IDs to the terms.
+  private cacheTermElements() {
+    const triggers = [
+      this.text.terms.pipe(filter(v => v.length > 0)),
+      this.bodyTextAsHtml().pipe(filter(v => v != "")),
+      this.documentHeaderAsHtml().pipe(filter(v => v != "")),
+    ];
+    combineLatest(triggers).pipe(delay(0), takeUntil(this.destroy$)).subscribe(([terms, _unused0, _unused1]) => {
+      this.numTerms = 0;
+      this.termToElements.clear();
+      for (let term of terms) {
+        try {
+          const elements = this.elem.nativeElement.querySelectorAll(`.${this.text.termToClass(term)}`);
+          this.termToElements.set(term, elements);
+          this.addIdToElements(elements);
+          this.numTerms += elements.length;
+        } catch {
+          console.log(`failed getting elements for: ${term}`);
+        }
       }
+      console.log(`terms: ${terms.length}`);
+      console.log(`words: ${this.numTerms}`);
+    })
+  }
+
+  private addIdToElements(elements: any[]) {
+    for (let e of elements) {
+      const id = `_vis_${this.idToVisibility.size}`;
+      e.id = id;
+      if (this.idToVisibility.has(id)) console.log('double id, shouldnt happen.');
+      this.idToVisibility.set(id, true);
     }
-    return res;
   }
 
   private updateClasses() {
     let i = 0;
     let shownCount = 0;
     for (const term of this.text.terms.value) {
-      try {
-        for (const e of this.elem.nativeElement.querySelectorAll(`.${term}`)) {
-          const shouldHide = this.shouldHide(term);
-          if (!shouldHide) shownCount++;
-          timer(Math.random() * 4000).subscribe(() => {
-            let size_before = e.classList.length;
-            if (ALLOW_FLICKER ? shouldHide : this.shouldHide(term)) {
-              e.classList.add('hidden');
-              if (FANCY_HIDDEN) {
-                e.classList.add(`hidden-${(term.length + i) % 10}`);
-              }
-            } else {
-              e.classList.remove('hidden');
+      for (const e of this.termToElements.get(term)) {
+        const targetVisibility = this.targetVisibility(term);
+        if (targetVisibility) shownCount++;
+        const id = e.id;
+        if (targetVisibility == this.idToVisibility.get(id)) continue;
+        this.idToVisibility.set(id, targetVisibility);
+        setTimeout(() => {
+          let size_before = e.classList.length;
+          const visibility = ALLOW_FLICKER ? targetVisibility : this.targetVisibility(term);
+          this.idToVisibility.set(id, visibility);
+          if (!visibility) {
+            e.classList.add('hidden');
+            if (FANCY_HIDDEN) {
+              e.classList.add(`hidden-${(term.length + i) % 10}`);
             }
-            if (size_before < e.classList.length) {
-              this.sounds.click();
-            }
-          });
-          i++;
-        }
-      } catch {
-
+          } else {
+            e.classList.remove('hidden');
+          }
+          if (size_before < e.classList.length) {
+            this.sounds.click();
+          }
+        }, Math.random() * 4000);
+        i++;
       }
     }
     this.updateDisplaySize(shownCount);
   }
 
-  private shouldHide(term: string): boolean {
-    return this.text.getTFIDF(term) > this.decayFactor;
+  private updateSizeOnScreen() {
+    this.termToElements.get('18kb').innerHTML = this.displaySize.value;
+  }
+
+  private targetVisibility(term: string): boolean {
+    return this.text.getTFIDF(term) <= this.decayFactor;
   }
 
   private updateDisplaySize(shownCount: number) {
@@ -196,22 +238,20 @@ export class AppComponent implements OnInit {
 
   private setupConsecutiveClickWatcher(): void {
     this.click$.pipe(
-      // 1. Group the clicks into buffers of 5
       bufferCount(CONSECUTIVE_CLICKS_REQUIRED, 1),
-      // 2. Check the time difference between the first and last click in the buffer
       map(clicks => {
         return clicks.every((v, i) => i === 0 ? true : clicks[i].timeStamp - clicks[i - 1].timeStamp < MAX_TIME_BETWEEN_CLICKS_MS);
       }),
-      // 3. Only pass through if the time difference is less than the max allowed interval for the group
       filter(v => v),
       take(1),
     ).subscribe(() => {
-      // 4. If the filter passes, 5 consecutive clicks have occurred quickly
       console.log('5 consecutive clicks detected! Closing tab...');
-      // To close the tab/window, you use window.close()
-      // This will only work if the tab/window was opened by a script (e.g., window.open()),
-      // which is a browser security feature. Otherwise, it will just fail silently.
       window.close();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

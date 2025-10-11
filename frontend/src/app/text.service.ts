@@ -49,7 +49,7 @@ export class TextService {
       map((t: string) => this.countWords(t)),
       switchMap((docFreq: Map<string, number>) => this.updateTF(docFreq)),
       map(() => this.updateTFIDF()),
-      shareReplay());
+      shareReplay(1));
   }
 
   private getAsciiHeader(): Observable<string> {
@@ -57,7 +57,7 @@ export class TextService {
       return t as string;
     })).pipe(
       map((t) => this.replaceSpaces(t)),
-      shareReplay(),
+      shareReplay(1),
       distinctUntilChanged(),
       tap((t) => {
         console.log("got ascii header");
@@ -67,14 +67,14 @@ export class TextService {
   private getBodyText(): Observable<string> {
     return this.http.get<string>(`${environment.deployUrl}/assets/test.txt`, {responseType: 'text' as 'json'}).pipe(
       tap(() => void console.log('got body text')),
-      shareReplay()
+      shareReplay(1)
     );
   }
 
   private getDocumentHeader(): Observable<string> {
     return this.http.get<string>(`${environment.deployUrl}/assets/file_header.txt`, {responseType: 'text' as 'json'}).pipe(
       tap(() => void console.log('got document header')),
-      shareReplay()
+      shareReplay(1)
     );
   }
 
@@ -137,14 +137,18 @@ export class TextService {
         const nonSplitter = '[^a-zA-Z0-9\'’]';
         seen.add(canonical);
         const r = new RegExp(`(${nonSplitter})(${wordInstance})(${nonSplitter})`, 'gi');
-        text = text.replaceAll(r, `$1<span class="${canonical}">$2</span>$3`);
+        text = text.replaceAll(r, `$1<span class="${this.termToClass(canonical)}">$2</span>$3`);
         const rStart = new RegExp(`^(${wordInstance})(${nonSplitter}|$)`, 'gi');
-        text = text.replaceAll(rStart, `<span class="${canonical}">$1</span>$2`);
+        text = text.replaceAll(rStart, `<span class="${this.termToClass(canonical)}">$1</span>$2`);
         const rEnd = new RegExp(`(${nonSplitter})(${wordInstance})$`, 'gi');
-        text = text.replaceAll(rEnd, `$1<span class="${canonical}">$2</span>`);
+        text = text.replaceAll(rEnd, `$1<span class="${this.termToClass(canonical)}">$2</span>`);
       }
     }
     return text.replaceAll("\n", "<br>");
+  }
+
+  termToClass(term: string) {
+    return `_${term}`;
   }
 
   countWords(text: string): Map<string, number> {
