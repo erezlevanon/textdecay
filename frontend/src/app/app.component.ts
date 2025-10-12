@@ -175,6 +175,7 @@ export class AppComponent implements OnInit, OnDestroy {
     let i = 0;
     let shownCount = 0;
     for (const term of this.text.terms.value) {
+      if (!this.termToElements.has(term)) continue;
       for (const e of this.termToElements.get(term)) {
         const targetVisibility = this.targetVisibility(term);
         if (targetVisibility) shownCount++;
