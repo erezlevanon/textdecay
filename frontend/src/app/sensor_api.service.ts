@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {catchError, map, Observable, of as observableOf} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,9 @@ export class SensorApiService {
     let url = "api/v1/read_sensor/";
     return (this.http.get(url)).pipe(map(response => {
       return response as boolean;
+    }), catchError((err) => {
+      console.log('sensor read error', err);
+      return observableOf(false);
     }));
   }
 }
