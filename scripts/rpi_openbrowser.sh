@@ -27,7 +27,7 @@ sleep 1s
 # old dwd
 # chromium-browser --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gestu>
 # new dwd
-chromium --kiosk --autoplay-policy=no-user-gesture-required --noerrdialogs --disable-infobars 'http://127.0.0.1:8000'
+chromium --kiosk --enable-logging=stderr --autoplay-policy=no-user-gesture-required --noerrdialogs --disable-infobars 'http://127.0.0.1:8000'
 
 # chromium-browser --noerrdialogs --autoplay-policy=no-user-gesture 'http://127.0.0.1:8000'
 # chromium-browser 'http://127.0.0.1:8000'
