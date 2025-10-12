@@ -81,7 +81,6 @@ export class AppComponent implements OnInit, OnDestroy {
     }),
     tap(() => {
       this.updateClasses();
-      this.updateSizeOnScreen();
     }));
 
   private decayFactor = INITIAL_DECAY_FACTOR;
@@ -202,10 +201,6 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     }
     this.updateDisplaySize(shownCount);
-  }
-
-  private updateSizeOnScreen() {
-    this.termToElements.get('18kb').innerHTML = this.displaySize.value;
   }
 
   private targetVisibility(term: string): boolean {
