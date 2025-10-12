@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # wait for server to load
-sleep 5s
+sleep 1s
 
 xhost +local:
 export DISPLAY=:0
@@ -27,7 +27,31 @@ sleep 1s
 # old dwd
 # chromium-browser --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gestu>
 # new dwd
-chromium --kiosk --enable-logging=stderr --autoplay-policy=no-user-gesture-required --noerrdialogs --disable-infobars 'http://127.0.0.1:8000'
+chromium 'http://127.0.0.1:8000'\
+	--kiosk \
+	--autoplay-policy=no-user-gesture-required \
+	--enable-logging=stderr \
+	--noerrdialogs \
+	--disable-infobars \
+	--disable-session-crashed-bubble \
+	--disable-features=TranslateUI,,RendererCodeIntegrity,BackForwardCache,GoogleCloudMessaging \
+	--incognito \
+	--disable-component-update \
+	--no-first-run \
+	--disable-background-networking \
+	--disable-default-apps \
+	--disable-translate \
+	--disable-sync \
+	--disable-extensions \
+	--disable-notifications \
+	--password-store=basic \
+	--use-gl=egl \
+	--disable-smooth-scrolling \
+	--disk-cache-dir=/dev/null \
+	--disk-cache-size=1 \
+	--media-cache-size=1 \
+	--disable-google-services
+
 
 # chromium-browser --noerrdialogs --autoplay-policy=no-user-gesture 'http://127.0.0.1:8000'
 # chromium-browser 'http://127.0.0.1:8000'
