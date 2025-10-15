@@ -19,7 +19,7 @@ if [ "$_IP" ]; then
 fi
 
 # Wait for the GUI and audio system to be ready
-sleep 1
+sleep 5
 
 # Set the environment for GUI and audio
 export DISPLAY=:0

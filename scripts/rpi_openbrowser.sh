@@ -21,7 +21,7 @@ xset s off
 # unclutter -idle 1 -root &
 
 # just in case.
-sleep 1s
+sleep 4s
 
 # Start Chromium.
 # old dwd
@@ -35,7 +35,7 @@ chromium 'http://127.0.0.1:8000'\
 	--disable-infobars \
 	--disable-session-crashed-bubble \
 	--disable-features=TranslateUI,,RendererCodeIntegrity,BackForwardCache,GoogleCloudMessaging \
-	--incognito \
+#	--incognito \
 	--disable-component-update \
 	--no-first-run \
 	--disable-background-networking \
@@ -45,9 +45,9 @@ chromium 'http://127.0.0.1:8000'\
 	--disable-extensions \
 	--disable-notifications \
 	--password-store=basic \
-	--use-gl=egl \
+#	--use-gl=egl \
 	--disable-smooth-scrolling \
-	--disk-cache-dir=/dev/null \
+#	--disk-cache-dir=/dev/null \
 	--disk-cache-size=1 \
 	--media-cache-size=1 \
 	--disable-google-services

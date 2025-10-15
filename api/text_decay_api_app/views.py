@@ -7,21 +7,12 @@ from rest_framework.response import Response
 from django.views.generic import View
 from django.http import HttpResponse
 
-from gpiozero import DistanceSensor, LED
+from gpiozero import DistanceSensor
 
 exhibit = config("EXHIBIT", cast=bool)
 if exhibit:
     print("initialize distance sensor: Start")
-    if True:
-        # inner scope
-        led0 = LED(23)
-        led0.off()
-        led1 = LED(24)
-        led1.off()
-        time.sleep(0.3)
-        led0.close()
-        led1.close()
-        time.sleep(0.3)
+    time.sleep(2)
     d_sensor = DistanceSensor(trigger=23, echo=24)
     print("initialize distance sensor: End")
 
