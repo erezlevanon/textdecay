@@ -23,6 +23,9 @@ xset s off
 # just in case.
 sleep 4s
 
+# clear cache to make sure latest version of app
+sudo rm -dfr ~/.cache/chromium/Default
+
 # Start Chromium.
 # old dwd
 # chromium-browser --kiosk --noerrdialogs --disable-infobars --autoplay-policy=no-user-gestu>
