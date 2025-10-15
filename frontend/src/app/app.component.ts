@@ -106,6 +106,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(private readonly sensorApi: SensorApiService, private readonly text: TextService,
               private readonly sounds: SoundsService, private readonly titleService: Title, private elem: ElementRef) {
+    console.log("SANITY: constructor");
     this.latestRead.pipe(takeUntil(this.destroy$)).subscribe();
     this.setupConsecutiveClickWatcher();
     this.displaySize.pipe(distinctUntilChanged(), takeUntilDestroyed()).subscribe(v => {
@@ -115,6 +116,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    console.log("SANITY: on init");
     if (environment.isDevelopment) {
       this.titleService.setTitle("🐣 " + this.titleService.getTitle());
     }
@@ -145,6 +147,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.documentHeaderAsHtml().pipe(filter(v => v != "")),
     ];
     combineLatest(triggers).pipe(delay(0), takeUntil(this.destroy$)).subscribe(([terms, _unused0, _unused1]) => {
+      console.log('SANITY: combine latest in cache term elements');
       this.numTerms = 0;
       this.termToElements.clear();
       for (let term of terms) {

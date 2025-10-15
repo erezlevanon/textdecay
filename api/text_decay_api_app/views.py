@@ -11,6 +11,7 @@ from gpiozero import DistanceSensor, LED
 
 exhibit = config("EXHIBIT", cast=bool)
 if exhibit:
+    print("initialize distance sensor: Start")
     if True:
         # inner scope
         led0 = LED(23)
@@ -22,6 +23,7 @@ if exhibit:
         led1.close()
         time.sleep(0.3)
     d_sensor = DistanceSensor(trigger=23, echo=24)
+    print("initialize distance sensor: End")
 
 
 class ReadSensorViewSet(viewsets.ModelViewSet):
