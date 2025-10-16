@@ -21,7 +21,7 @@ xset s off
 # unclutter -idle 1 -root &
 
 # just in case.
-sleep 4s
+sleep 7s
 
 # clear cache to make sure latest version of app
 sudo rm -dfr ~/.cache/chromium/Default
