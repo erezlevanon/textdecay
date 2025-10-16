@@ -1,0 +1,21 @@
+# /etc/systemd/system/ngrok.service
+
+[Unit]
+Description=Ngrok Tunnel Service
+After=network.target
+
+[Service]
+User=yotamerez
+WorkingDirectory=/home/yotamerez/
+ExecStart=/usr/local/bin/ngrok start --all
+
+# --- Critical for Auto-Restart ---
+Restart=on-failure
+# Wait 5 seconds before attempting a restart
+RestartSec=45
+# Allow the service to run indefinitely
+TimeoutStopSec=5
+
+[Install]
+# This unit should be started when the system reaches multi-user state (boot)
+WantedBy=multi-user.target

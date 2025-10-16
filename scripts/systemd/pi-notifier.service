@@ -1,0 +1,39 @@
+[Unit]
+Description=Run DDNS/Ngrok Notifier Script Once on Boot
+
+# CRITICAL: Ensures this service starts only after ngrok.service is started.
+
+After=ngrok.service
+Requires=ngrok.service
+
+[Service]
+
+# Service Type: 'oneshot' means the service runs a command and exits.
+
+Type=oneshot
+
+# User that the service runs as (must match the script location)
+
+User=yotamerez
+
+# Working directory for execution context
+
+WorkingDirectory=/home/yotamerez/textdecay/scripts
+
+# The command to execute the Python script using the full path to python3
+
+# !!! REPLACE THE PATH BELOW WITH YOUR ACTUAL SCRIPT LOCATION !!!
+
+ExecStart=/home/yotamerez/textdecay/.venv/bin/python send_ip.py 
+
+# --- Optional Security ---
+
+# Ensure the service is marked as failed if the script returns a non-zero exit code
+
+RemainAfterExit=no
+
+[Install]
+
+# This unit should be started when the system reaches multi-user state (boot)
+
+WantedBy=multi-user.target

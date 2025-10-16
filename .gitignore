@@ -11,3 +11,4 @@ input_images
 /api/media/*
 /api/decaying_storage_api/db.sqlite3
 /api/text_decay_api_project/db.sqlite3
+/scripts/.env
