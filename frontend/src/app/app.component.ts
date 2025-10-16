@@ -17,7 +17,7 @@ import {
   Subject,
   bufferCount,
   filter,
-  takeUntil,
+  takeUntil, startWith,
 } from "rxjs";
 import {AsyncPipe, formatNumber, NgForOf, NgIf} from "@angular/common";
 import {Title} from "@angular/platform-browser";
@@ -96,7 +96,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   readonly blinkText = this.latestRead.pipe(map((read) => {
     return read === (DIRECTION === Directions.APPEAR) ? "you are standing here." : "you are not standing here.";
-  }));
+  }), startWith('Initializing...'));
 
   private termToElements = new Map<string, any>();
   private idToVisibility = new Map<string, boolean>();
