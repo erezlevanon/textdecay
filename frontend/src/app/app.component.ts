@@ -83,7 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
       const noise = Math.random() > SIGNAL_TO_NOISE ? -1 : 1;
       const dir = (v ? 1 : -1) * DIRECTION;
       const change = (dir * noise * DECAY_RATE);
-      const directionalChange = DIRECTION === Directions.APPEAR ? 1 + change : 1 - change;
+      const directionalChange = DIRECTION === Directions.APPEAR ? 1.1 + change : 1 - change;
       this.decayFactor = Math.min(Math.max(this.decayFactor * directionalChange, ALLOWED_MIN), ALLOWED_MAX);
       if (this.decayFactor == ALLOWED_MIN) {
         setTimeout(() => {
