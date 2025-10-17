@@ -65,11 +65,18 @@ const MAX_TIME_BETWEEN_CLICKS_MS = 800;
 export class AppComponent implements OnInit, OnDestroy {
   title = 'decaying_storage_frontend';
 
+  private forceTrue_ = false;
+
   private destroy$ = new Subject<void>();
 
   private readonly interval = interval(SENSOR_READ_TIME);
   readonly latestRead = this.interval.pipe(
-    switchMap(() => this.sensorApi.getSensorRead()),
+    switchMap(() => this.sensorApi.getSensorRead(this.forceTrue_)),
+    tap(v => {
+      if (v && !this.forceTrue_) {
+        this.forceTrue_ = true;
+      }
+    }),
     map(v => DIRECTION === Directions.APPEAR ? v : !v),
     shareReplay(1),
     tap(v => {
@@ -78,6 +85,12 @@ export class AppComponent implements OnInit, OnDestroy {
       const change = (dir * noise * DECAY_RATE);
       const directionalChange = DIRECTION === Directions.APPEAR ? 1 + change : 1 - change;
       this.decayFactor = Math.min(Math.max(this.decayFactor * directionalChange, ALLOWED_MIN), ALLOWED_MAX);
+      if (this.decayFactor == ALLOWED_MIN) {
+        setTimeout(() => {
+          console.log("all clear");
+          this.forceTrue_ = false;
+        }, 5000);
+      }
     }),
     tap(() => {
       this.updateClasses();

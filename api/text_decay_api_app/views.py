@@ -10,8 +10,6 @@ from django.http import HttpResponse
 
 from gpiozero import DistanceSensor, LED
 
-
-
 exhibit = config("EXHIBIT", cast=bool)
 
 switch = None
@@ -60,6 +58,9 @@ class ReadSensorViewSet(viewsets.ModelViewSet):
     def list(self, request):
         global d_sensor, inflight
         print('in read_sensor')
+        force_true_param = request.query_params.get('force_true')
+        if force_true_param is not None and force_true_param.lower() == 'true':
+            return Response(True)
         if inflight > 10:
             restart_rpi_os()
         if exhibit:
@@ -74,7 +75,7 @@ class ReadSensorViewSet(viewsets.ModelViewSet):
                 print('got distance {}'.format(d))
                 return Response(d < 0.9)
             except Exception as e:
-                print(f"ERROR READING SENSOR: {e}", flush=True) 
+                print(f"ERROR READING SENSOR: {e}", flush=True)
                 # Attempt to close the faulty sensor and set to None for next retry
                 d_sensor = None
                 return Response(False)
@@ -88,4 +89,3 @@ class AngularAppView(View):
                 return HttpResponse(file.read())
         except FileNotFoundError:
             return HttpResponse("Angular build files not found", status=501)
-
