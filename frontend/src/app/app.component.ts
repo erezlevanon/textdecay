@@ -36,6 +36,7 @@ const DECAY_RATE = 0.1;
 const INITIAL_RESPONSE_TIME_SECOND = 3;
 const SENSOR_READ_TIME = 1000;
 const SIGNAL_TO_NOISE = 0.6;
+const RESET_DECAY_DELTA_BONUS = 2; // Add to the decay factor change when going back to initial state.
 
 const BLINK_EVERY_MS = 2000;
 const BLINK_OFF_MS = 300;
@@ -82,8 +83,9 @@ export class AppComponent implements OnInit, OnDestroy {
     tap(v => {
       const noise = Math.random() > SIGNAL_TO_NOISE ? -1 : 1;
       const dir = (v ? 1 : -1) * DIRECTION;
-      const change = (dir * noise * DECAY_RATE);
-      const directionalChange = DIRECTION === Directions.APPEAR ? 1.1 + change : 1 - change;
+      const resetBonus = dir < 0 && noise > 0 ? RESET_DECAY_DELTA_BONUS : 0;
+      const change = (dir * noise * DECAY_RATE) - resetBonus;
+      const directionalChange = DIRECTION === Directions.APPEAR ? 1 + change : 1 - change;
       this.decayFactor = Math.min(Math.max(this.decayFactor * directionalChange, ALLOWED_MIN), ALLOWED_MAX);
       if (this.decayFactor == ALLOWED_MIN) {
         setTimeout(() => {
