@@ -1,4 +1,4 @@
 Current file_size: 18kb
-Project_Name:   "Bits&Pieces"
-Prototype_02:   "Text degradation experiment - 01”
-Location:       "Minus_one, New_Institute, Rotterdam, Netherlands.”
+Project_Name:   "Decaying Text Machine"
+Prototype_V:   "Text degradation experiment - 02”
+Location:       "DDW25, Evoluon, Eindhoven, Netherlands.”
