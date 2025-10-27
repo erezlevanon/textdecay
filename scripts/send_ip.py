@@ -138,13 +138,15 @@ def send_update_email(update_status, ngrok_host_port, ngrok_status, resolved_ip)
         ngrok_host, ngrok_port = ngrok_host_port.rsplit(':', 1)
         
         # The DuckDNS domain now points to this Ngrok Host's IP
-        ngrok_cmd = f"ssh -p {ngrok_port} {SSH_USER}@{DUCKDNS_DOMAIN}"
+        duck_cmd = f"ssh -p {ngrok_port} {SSH_USER}@{DUCKDNS_DOMAIN}.duckdns.org"
+        ngrok_cmd = f"ssh -p {ngrok_port} {SSH_USER}@{ngrok_host}"
         ngrok_details = (
             f"**✅ Ngrok Tunnel is Active**\n"
             f"Ngrok Host: {ngrok_host_port}\n"
             f"Resolved Ngrok IP: **{resolved_ip}**\n"
-            f"Connect using the *permanent* domain command:\n"
-            f"   {ngrok_cmd}"
+            f"Connect using these domain commands:\n"
+            f"   {duck_cmd}\n"
+            f"   {ngrok_cmd}\n"
         )
     else:
         ngrok_details = f"**❌ Ngrok Tunnel Status:** {ngrok_host_port}. \n(Please check if the `ngrok tcp 22` command is running on your Pi.)"
