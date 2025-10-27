@@ -10,10 +10,12 @@ from django.http import HttpResponse
 
 from gpiozero import DistanceSensor, LED
 
+DEMO_MODE_TOGGLE_SECONDS = 13
+
 exhibit = config("EXHIBIT", cast=bool)
+demo_mode = config("DEMO_MODE", default=False, cast=bool)
 
 switch = None
-
 inflight = 0
 
 def restart_rpi_os():
@@ -28,30 +30,37 @@ def init_d_sensor():
     global switch
     try:
         if switch is None:
-            switch = LED(12)
-            print("turning sensor off")
-            switch.off()
-            for i in range(10):
-                print('wait: {}'.format(i))
-                time.sleep(1)
-            print("turning sensor on")
-            switch.on();
-            time.sleep(2);
-            print("creating sensor")
-            return DistanceSensor(trigger="GPIO23", echo="GPIO24")
+            # Only attempt GPIO setup if not in demo mode
+            if not demo_mode:
+                switch = LED(12)
+                print("turning sensor off")
+                switch.off()
+                for i in range(10):
+                    print('wait: {}'.format(i))
+                    time.sleep(1)
+                print("turning sensor on")
+                switch.on()
+                time.sleep(2)
+                print("creating sensor")
+                return DistanceSensor(trigger="GPIO23", echo="GPIO24")
+            else:
+                print("Demo mode active: skipping GPIO initialization.")
+                return None # The sensor is explicitly not needed
         return None
-    except:
-        print("problem init d")
+    except Exception as e:
+        print(f"problem init d: {e}")
         return None
 
 
-print("SANITY")
 d_sensor = None
 
 if exhibit and d_sensor is None:
-    print("initialize distance sensor: Start")
-    d_sensor = init_d_sensor()
-    print("initialize distance sensor: End")
+    if demo_mode:
+        print("Demo Mode is active. Skipping sensor initialization.")
+    else:
+        print("initialize distance sensor: Start")
+        d_sensor = init_d_sensor()
+        print("initialize distance sensor: End")
 
 
 class ReadSensorViewSet(viewsets.ModelViewSet):
@@ -61,6 +70,12 @@ class ReadSensorViewSet(viewsets.ModelViewSet):
         force_true_param = request.query_params.get('force_true')
         if force_true_param is not None and force_true_param.lower() == 'true':
             return Response(True)
+
+        if demo_mode:
+            current_state = bool(int(time.time() / DEMO_MODE_TOGGLE_SECONDS) % 2)
+
+            print(f"Demo state: {current_state}")
+            return Response(current_state)
         if inflight > 10:
             restart_rpi_os()
         if exhibit:
